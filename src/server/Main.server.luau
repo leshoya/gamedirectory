@@ -18,6 +18,7 @@ local Intro = require(script.Parent.Progress.Intro)
 local HeldItem = require(script.Parent.Items.HeldItem)
 local RegisterStation = require(script.Parent.Stations.RegisterStation)
 local MakerStation = require(script.Parent.Stations.MakerStation)
+local DrinkStation = require(script.Parent.Stations.DrinkStation)
 local Power = require(script.Parent.Shift.Power)
 local NightController = require(script.Parent.Shift.NightController)
 
@@ -39,12 +40,7 @@ end)
 -- Stations
 HeldItem.init()
 RegisterStation.init(store.Register)
-MakerStation.init(store.Shaker, {
-	Item = "BubbleTea",
-	Config = StoreConfig.BubbleTea,
-	ObjectText = "Shaker",
-	ActionText = "Make bubble tea",
-})
+DrinkStation.init(store.DrinkSpots)
 MakerStation.init(store.HotWater, {
 	Item = "Ramen",
 	Config = StoreConfig.Ramen,
