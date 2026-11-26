@@ -4,13 +4,20 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StoreConfig = require(ReplicatedStorage.Shared.StoreConfig)
 local StoreShell = require(script.Parent.StoreShell)
+local Exterior = require(script.Parent.Exterior)
 local Fixtures = require(script.Parent.Fixtures)
+local Decorations = require(script.Parent.Decorations)
 local RegisterModel = require(script.Parent.RegisterModel)
+local Manager = require(script.Parent.Manager)
 local StoreLighting = require(script.Parent.StoreLighting)
 
 export type Store = {
 	Model: Model,
 	Register: RegisterModel.RegisterParts,
+	Shaker: BasePart,
+	HotWater: BasePart,
+	Breaker: BasePart,
+	Lights: { Instance }, -- everything that goes dark in a power cut
 }
 
 local StoreBuilder = {}
@@ -41,13 +48,28 @@ function StoreBuilder.build(): Store
 	local store = Instance.new("Model")
 	store.Name = "Store"
 	StoreShell.build(store)
-	Fixtures.build(store)
+	Exterior.build(store)
+	local fixtures = Fixtures.build(store)
+	Decorations.build(store)
 	local register = RegisterModel.build(store)
 	buildSpawn(store)
 	store.Parent = workspace
+	Manager.build(store)
 
 	StoreLighting.apply()
-	return { Model = store, Register = register }
+	return {
+		Model = store,
+		Register = register,
+		Shaker = fixtures.Shaker,
+		HotWater = fixtures.HotWater,
+		Breaker = fixtures.Breaker,
+		Lights = {
+			store:FindFirstChild("Ceiling") :: Instance,
+			store:FindFirstChild("StringLights") :: Instance,
+			store:FindFirstChild("Decorations") :: Instance,
+			store:FindFirstChild("Fixtures") :: Instance,
+		},
+	}
 end
 
 return StoreBuilder

@@ -1,7 +1,7 @@
 Midnight Plushie Mart (working title): game design doc
 Nov 26, 2026 · @Sophia L
 Art direction: kawaii pastel, quietly wrong
-Direction: an original kawaii, K-pop-inspired pastel world. Players work the night shift at a pastel 24-hour convenience store (a konbini) in a plush-animal town. Customers are adorable felt-and-stitch plush animals. The scare is eeriness: the cuteness slowly goes wrong, never jump scares or gore.
+Direction: an original kawaii, K-pop-inspired pastel world. Players work the night shift at a pastel 24-hour convenience store (a konbini) in a plush-animal town. Customers are adorable felt-and-stitch plush animals. The scare is eeriness: the cuteness slowly goes wrong, never jump scares. Some plush-style gore is allowed on anomalies (torn seams, spilling stuffing, red thread), switchable in StoreConfig.Gore.
 Why this angle
 • It's a gap. Anomaly and night-shift games are almost all dark, realistic or grimy. A pastel version stands out in one thumbnail and appeals to players who like cute games but want a little thrill.
 • The contrast does the scaring. A smiling pastel bunny whose smile is one stitch too wide is more unsettling than a monster, and it stays friendly for younger players.
@@ -199,7 +199,7 @@ Without some unease, it's just a store sim
 Test the eerie effects early; the color drain and warped jingle carry most of the mood
 Too creepy for the cute crowd
 Younger players may bounce
-Creepy, never gory; fade-outs instead of jump scares; check Roblox's content maturity questionnaire
+Keep gore plush-style (stuffing and red thread, nothing realistic) and behind StoreConfig.Gore; fade-outs instead of jump scares; answer Roblox's content maturity questionnaire for the blood it shows
 Plush art takes longer than expected
 The look is the hook, and you're new to modeling
 Simple shapes plus good textures; buy or commission a base plush rig if stuck
