@@ -14,6 +14,7 @@ local Shop = require(script.Parent.Economy.Shop)
 local Monetization = require(script.Parent.Economy.Monetization)
 local Cosmetics = require(script.Parent.Cosmetics.Cosmetics)
 local Rulebook = require(script.Parent.Progress.Rulebook)
+local Intro = require(script.Parent.Progress.Intro)
 local HeldItem = require(script.Parent.Items.HeldItem)
 local RegisterStation = require(script.Parent.Stations.RegisterStation)
 local MakerStation = require(script.Parent.Stations.MakerStation)
@@ -52,5 +53,6 @@ MakerStation.init(store.HotWater, {
 })
 
 -- The shift
-Power.init(store.Ceiling, store.Breaker)
+Power.init(store.Lights, store.Breaker)
+Intro.init()
 NightController.start()

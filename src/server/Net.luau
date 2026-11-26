@@ -2,6 +2,7 @@
 -- Remotes the client UI talks to, in ReplicatedStorage.Remotes:
 --   ShiftEvent (RemoteEvent): night summaries and the end-of-shift card
 --   Shop (RemoteFunction): buy and equip
+--   IntroDone (RemoteEvent): the player finished or skipped the manager's welcome
 -- (Sounds and effects use the separate Feedback remote; see Feedback.luau.)
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -25,5 +26,6 @@ end
 
 Net.ShiftEvent = get("RemoteEvent", "ShiftEvent") :: RemoteEvent
 Net.Shop = get("RemoteFunction", "Shop") :: RemoteFunction
+Net.IntroDone = get("RemoteEvent", "IntroDone") :: RemoteEvent
 
 return Net

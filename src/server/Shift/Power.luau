@@ -1,6 +1,8 @@
 --!strict
--- The store's lights and the breaker box. Power.cut() turns the lights off and arms the breaker;
--- holding E at the breaker turns them back on. Published as the ReplicatedStorage "PowerOut" attribute.
+-- The store's lights and the breaker box. Power.cut() turns every light inside the store off
+-- (lamps, light panels, string lights, lanterns, the cooler) and arms the breaker; holding E at the
+-- breaker turns them back on. Published as the ReplicatedStorage "PowerOut" attribute.
+-- The street lamps and neon sign outside stay on, so the dark store glows from outside.
 
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -9,20 +11,24 @@ local Feedback = require(script.Parent.Parent.Feedback)
 
 local Power = {}
 
-local panels: { BasePart } = {}
+type Glowing = { Part: BasePart, Color: Color3 }
+
+local glowing: { Glowing } = {}
 local lights: { Light } = {}
 local prompt: ProximityPrompt? = nil
 local out = false
 local restoredEvent = Instance.new("BindableEvent")
 Power.Restored = restoredEvent.Event
 
+local OFF_COLOR = Color3.fromRGB(70, 65, 80)
+
 local function setLights(on: boolean)
 	for _, light in lights do
 		light.Enabled = on
 	end
-	for _, panel in panels do
-		panel.Material = if on then Enum.Material.Neon else Enum.Material.SmoothPlastic
-		panel.Color = if on then StoreConfig.Colors.Light else Color3.fromRGB(70, 65, 80)
+	for _, g in glowing do
+		g.Part.Material = if on then Enum.Material.Neon else Enum.Material.SmoothPlastic
+		g.Part.Color = if on then g.Color else g.Color:Lerp(OFF_COLOR, 0.7)
 	end
 	Lighting.Ambient = if on then StoreConfig.Lighting.Ambient else StoreConfig.Power.OutageAmbient
 end
@@ -69,12 +75,15 @@ function Power.flicker(duration: number)
 	end
 end
 
-function Power.init(ceiling: Instance, breaker: BasePart)
-	for _, d in ceiling:GetDescendants() do
-		if d:IsA("Light") then
-			table.insert(lights, d)
-		elseif d:IsA("BasePart") and d.Name == "LightPanel" then
-			table.insert(panels, d)
+-- `containers` hold everything that should go dark: every Light and every Neon part inside them.
+function Power.init(containers: { Instance }, breaker: BasePart)
+	for _, container in containers do
+		for _, d in container:GetDescendants() do
+			if d:IsA("Light") then
+				table.insert(lights, d)
+			elseif d:IsA("BasePart") and d.Material == Enum.Material.Neon then
+				table.insert(glowing, { Part = d, Color = d.Color })
+			end
 		end
 	end
 

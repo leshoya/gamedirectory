@@ -19,12 +19,7 @@ local rng = Random.new()
 local secondChanceUsed = false
 
 -- Where the plushes first appear in the dark.
-local STALKER_SPOTS = {
-	Vector3.new(-15, 0, -8),
-	Vector3.new(16, 0, -10),
-	Vector3.new(0, 0, 12),
-	Vector3.new(-16, 0, 11),
-}
+local STALKER_SPOTS = StoreConfig.Power.StalkerSpots
 
 local function nearestPlayerRoot(from: Vector3): BasePart?
 	local best, bestDistance = nil, math.huge

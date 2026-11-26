@@ -50,8 +50,10 @@ local function makePlush(anomaly: Anomalies.Anomaly?): (PlushRig.Plush, boolean)
 	return PlushRig.build(pick(cfg.SpeciesPool), options, rng), sparkle
 end
 
-local function addPrompt(body: BasePart, objectText: string, action: string, key: Enum.KeyCode, gamepad: Enum.KeyCode): ProximityPrompt
+-- `offset` shifts the prompt sideways on screen so Serve and Turn away sit side by side.
+local function addPrompt(body: BasePart, objectText: string, action: string, key: Enum.KeyCode, gamepad: Enum.KeyCode, offset: number): ProximityPrompt
 	local prompt = Instance.new("ProximityPrompt")
+	prompt.UIOffset = Vector2.new(offset, 0)
 	prompt.ObjectText = objectText
 	prompt.ActionText = action
 	prompt.KeyboardKeyCode = key
@@ -113,8 +115,8 @@ function Customer.run(parent: Instance, ctx: Context)
 	end
 
 	-- Wait to be served or turned away
-	local serve = addPrompt(body, plush.DisplayName, "Serve", Enum.KeyCode.E, Enum.KeyCode.ButtonX)
-	local turnAway = addPrompt(body, plush.DisplayName, "Sorry, we're closed", Enum.KeyCode.F, Enum.KeyCode.ButtonY)
+	local serve = addPrompt(body, plush.DisplayName, "Serve", Enum.KeyCode.E, Enum.KeyCode.ButtonX, -110)
+	local turnAway = addPrompt(body, "Something's wrong?", "Sorry, we're closed", Enum.KeyCode.F, Enum.KeyCode.ButtonY, 110)
 	local kind: "Served" | "TurnedAway" | "Left" | "Closed" = "Left"
 	local by: Player? = nil
 
@@ -171,7 +173,8 @@ function Customer.run(parent: Instance, ctx: Context)
 		task.wait(cfg.ReplyTime)
 		bubble.hide()
 		model.Parent = ctx.Linger
-		CustomerMover.walkPath(model, { Vector3.new(7.5, 0, 9), freeLingerSpot(ctx.Linger) }, cfg.LeaveSlowSpeed)
+		local spot = freeLingerSpot(ctx.Linger)
+		CustomerMover.walkPath(model, { Vector3.new(spot.X, 0, cfg.LingerEntryZ), spot }, cfg.LeaveSlowSpeed)
 		CustomerMover.stare(model, function()
 			return false
 		end)

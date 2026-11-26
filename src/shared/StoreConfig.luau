@@ -8,13 +8,27 @@ local StoreConfig = {}
 StoreConfig.FloorY = 0.2
 
 StoreConfig.Size = {
-	Width = 40,
-	Depth = 30,
-	WallHeight = 12,
+	Width = 56,
+	Depth = 40,
+	WallHeight = 14,
 	WallThickness = 1,
 	DoorWidth = 8,
 	DoorHeight = 9,
-	FloorTile = 5,
+	FloorTile = 4, -- Width and Depth should both divide by this
+}
+
+-- Where things go inside the store (X across, Z from the back wall at -Depth/2 to the door at +Depth/2).
+StoreConfig.Layout = {
+	Shelves = { X = { 2, 10, 18 }, Z = -1, Length = 16 }, -- three aisles of two-sided shelves
+	Fridge = { Z = -2, Length = 20 }, -- along the right wall
+	BubbleTeaX = -16, -- stations against the back wall
+	RamenX = 2,
+	StaffDoorX = 20,
+	ManagerSpot = Vector3.new(20, 0, -15.5), -- Manager Mochi stands in front of the staff door
+	WindowBar = { FromX = -25, ToX = -7 }, -- a counter with stools along the front window
+	CeilingLights = { X = { -21, -7, 7, 21 }, Z = { -12, -1, 10 } },
+	StringLightSpacing = 2.5,
+	LightEvery = 4, -- every 4th string light actually lights up the room
 }
 
 StoreConfig.Colors = {
@@ -35,6 +49,20 @@ StoreConfig.Colors = {
 	Light = Color3.fromRGB(255, 228, 246),
 	Sidewalk = Color3.fromRGB(205, 200, 215),
 	SignText = Color3.fromRGB(120, 90, 160),
+	Wainscot = Color3.fromRGB(255, 226, 238), -- lower wall panels
+	Road = Color3.fromRGB(70, 66, 86),
+	Leaf = Color3.fromRGB(150, 210, 160),
+	Pot = Color3.fromRGB(255, 205, 170),
+	Wood = Color3.fromRGB(235, 205, 175),
+}
+
+-- Pastel colors for string lights, bunting, lanterns and capsule toys.
+StoreConfig.Pastels = {
+	Color3.fromRGB(255, 160, 205),
+	Color3.fromRGB(160, 225, 255),
+	Color3.fromRGB(255, 225, 140),
+	Color3.fromRGB(175, 235, 190),
+	Color3.fromRGB(210, 180, 255),
 }
 
 StoreConfig.Products = {
@@ -47,8 +75,8 @@ StoreConfig.Products = {
 }
 
 StoreConfig.Register = {
-	Position = Vector3.new(-12, 0, 3), -- counter center (Y is ignored; it sits on the floor)
-	CounterSize = Vector3.new(10, 3.5, 3),
+	Position = Vector3.new(-14, 0, 6), -- counter center (Y is ignored; it sits on the floor)
+	CounterSize = Vector3.new(12, 3.5, 3.5),
 	PromptDistance = 7,
 	PromptKey = Enum.KeyCode.E,
 	ReleaseDistance = 12, -- walk this far from the register and you clock out
@@ -93,9 +121,10 @@ StoreConfig.Ramen = {
 
 -- Plush customers. Positions are on the floor (Y is ignored).
 StoreConfig.Customers = {
-	SpawnPosition = Vector3.new(0, 0, 24), -- out on the sidewalk
-	DoorPosition = Vector3.new(0, 0, 11), -- just inside the door
-	OrderSpot = Vector3.new(-10, 0, 7.2), -- customer side of the register
+	SpawnPosition = Vector3.new(0, 0, 28), -- out on the sidewalk
+	DoorPosition = Vector3.new(0, 0, 16), -- just inside the door
+	OrderSpot = Vector3.new(-12, 0, 9.8), -- customer side of the register
+	PlushScale = 1.35, -- how big plushes are; at 1.35 their heads clear the counter
 	WalkSpeed = 7, -- studs per second
 	HopHeight = 0.35,
 	HopRate = 9, -- hops per second while walking
@@ -104,8 +133,10 @@ StoreConfig.Customers = {
 	LeaveSlowSpeed = 2.5, -- turned-away anomalies leave slowly, still smiling
 	Menu = { "BubbleTea", "Ramen" }, -- what normal customers order
 	Payments = { "coins", "a card", "exact change", "shiny coins" }, -- what normal customers pay with
-	-- Served anomalies don't leave: they stand in the aisle, watching, until the night ends.
-	LingerSpots = { Vector3.new(7.5, 0, -5), Vector3.new(7.5, 0, 0), Vector3.new(7.5, 0, 4), Vector3.new(15, 0, 7) },
+	-- Served anomalies don't leave: they stand in an aisle, watching, until the night ends.
+	-- They walk along the front of the aisles at LingerEntryZ, then straight down to their spot.
+	LingerEntryZ = 11,
+	LingerSpots = { Vector3.new(6, 0, -6), Vector3.new(14, 0, 1), Vector3.new(6, 0, 2), Vector3.new(14, 0, -7) },
 	PromptDistance = 7,
 	BubbleMaxDistance = 60,
 	SparkleChance = 0.1, -- chance a customer is a rare Sparkle plush
@@ -173,12 +204,13 @@ StoreConfig.Dread = {
 StoreConfig.Power = {
 	CutEvery = { 35, 60 }, -- seconds between power cuts, random in this range
 	ResetHold = 2, -- seconds to hold E at the breaker
-	BreakerPosition = Vector3.new(19.4, 0, 9), -- on the right wall near the door (Y is height above floor: 4)
+	BreakerPosition = Vector3.new(27.4, 0, 14), -- on the right wall near the door
 	OutageAmbient = Color3.fromRGB(18, 14, 26),
 	BlackoutTime = 20, -- seconds to reset the breaker when Dread fills
 	FlickerEvery = 2.5, -- seconds between flickers during the blackout
 	Stalkers = 3, -- plushes that creep closer each flicker
 	StalkerStep = 3, -- studs closer each flicker
+	StalkerSpots = { Vector3.new(-24, 0, -14), Vector3.new(24, 0, -16), Vector3.new(0, 0, 14), Vector3.new(-24, 0, 14) },
 }
 
 -- Saved progress. Bump the store name to wipe everyone's data.
@@ -216,6 +248,14 @@ StoreConfig.Sounds = {
 	Sparkle = { Id = 2609981431, Volume = 0.5 },
 } :: { [string]: Sound }
 
+-- Background sound in the store. The music box slows and drops in pitch as Dread rises,
+-- and goes quiet when the power is out. (APM music and a loopable hum, both free on the Creator Store.)
+StoreConfig.Ambience = {
+	Music = { Id = 1845682836, Volume = 0.22 },
+	FridgeHum = { Id = 171186876, Volume = 0.25 },
+	MusicSlowdownAtFullDread = 0.35, -- playback speed drops by this much at full Dread
+}
+
 -- Client-side visual effects.
 StoreConfig.Effects = {
 	HeartTexture = "rbxassetid://241778280", -- white heart, tinted per burst
@@ -228,7 +268,7 @@ StoreConfig.Effects = {
 	Bad = Color3.fromRGB(255, 120, 150),
 }
 
-StoreConfig.SpawnPosition = Vector3.new(0, 0, 10) -- just inside the door
+StoreConfig.SpawnPosition = Vector3.new(0, 0, 13) -- just inside the door
 StoreConfig.SignText = "PLUSHIE MART"
 
 return StoreConfig

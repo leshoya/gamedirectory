@@ -14,6 +14,7 @@ export type Data = {
 	Owned: { [string]: boolean },
 	Equipped: { [string]: string }, -- Kind -> item id
 	Stats: { Caught: number, Nights: number, ShiftsWon: number },
+	Flags: { [string]: boolean }, -- one-time things, like "SeenIntro"
 }
 
 local PlayerData = {}
@@ -41,6 +42,7 @@ local function defaults(): Data
 		Owned = { NewHire = true, MintApron = true, PinkApron = true },
 		Equipped = { Title = "NewHire" },
 		Stats = { Caught = 0, Nights = 0, ShiftsWon = 0 },
+		Flags = {},
 	}
 end
 
@@ -51,7 +53,7 @@ local function reconcile(saved: any): Data
 		return data
 	end
 	data.Tips = tonumber(saved.Tips) or 0
-	for _, key in { "Rulebook", "Owned", "Equipped" } do
+	for _, key in { "Rulebook", "Owned", "Equipped", "Flags" } do
 		if type(saved[key]) == "table" then
 			for k, v in saved[key] do
 				(data :: any)[key][k] = v

@@ -15,6 +15,7 @@ local Accessories = require(script.Parent.Accessories)
 local Wrongness = require(script.Parent.Wrongness)
 
 export type Options = {
+	Scale: number?, -- defaults to StoreConfig.Customers.PlushScale
 	Sparkle: boolean?,
 	Accessory: string?, -- one of Accessories.Kinds
 	AccessoryColor: Color3?,
@@ -135,6 +136,12 @@ function PlushRig.build(speciesName: string, options: Options, rng: Random): Plu
 	end
 	if options.Sparkle then
 		addSparkle(head)
+	end
+
+	-- Built at a base size, then scaled around the feet so it still stands on the floor.
+	local scale = options.Scale or StoreConfig.Customers.PlushScale
+	if scale ~= 1 then
+		model:ScaleTo(scale)
 	end
 
 	return {
