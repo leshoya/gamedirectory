@@ -94,21 +94,20 @@ StoreConfig.Customers = {
 	ReplyTime = 2, -- seconds a reply bubble ("Thank you!") stays up before they leave
 	PromptDistance = 7,
 	BubbleMaxDistance = 60,
-	SparkleChance = 0.1, -- chance a customer is a rare Sparkle Bunny
+	SparkleChance = 0.1, -- chance a customer is a rare Sparkle plush
 	SparkleTipMultiplier = 3,
+	SpeciesPool = { "Bunny", "Kitten", "Bear", "Puppy", "Frog" }, -- see Shared.PlushSpecies
+	AccessoryChance = 0.6, -- chance a customer wears a bow, scarf or flower
+	BlinkMin = 2.5, -- seconds between blinks
+	BlinkMax = 5,
 }
 
-StoreConfig.Species = {
-	Bunny = {
-		Body = Color3.fromRGB(255, 214, 230),
-		Inner = Color3.fromRGB(255, 160, 195),
-		Eyes = Color3.fromRGB(45, 35, 60),
-	},
-	SparkleBunny = {
-		Body = Color3.fromRGB(225, 205, 255),
-		Inner = Color3.fromRGB(255, 215, 120),
-		Eyes = Color3.fromRGB(45, 35, 60),
-	},
+-- Anomaly plushes can be torn open. Enabled = false removes the tears entirely;
+-- RedThread = false keeps the stuffing but drops the red threads and stain.
+-- Blood-like content affects the game's maturity label in Roblox's content questionnaire.
+StoreConfig.Gore = {
+	Enabled = true,
+	RedThread = true,
 }
 
 -- Tips for serving. A streak is shared by the whole team and breaks when a customer leaves unserved.

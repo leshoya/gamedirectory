@@ -4,7 +4,10 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StoreConfig = require(ReplicatedStorage.Shared.StoreConfig)
-local PlushModel = require(script.Parent.PlushModel)
+local PlushSpecies = require(ReplicatedStorage.Shared.PlushSpecies)
+local PlushRig = require(script.Parent.Parent.Plush.PlushRig)
+local Accessories = require(script.Parent.Parent.Plush.Accessories)
+local Blink = require(script.Parent.Parent.Plush.Blink)
 local CustomerMover = require(script.Parent.CustomerMover)
 local SpeechBubble = require(script.Parent.SpeechBubble)
 local HeldItem = require(script.Parent.Parent.Items.HeldItem)
@@ -58,15 +61,31 @@ local function waitToBeServed(prompt: ProximityPrompt, bubble: SpeechBubble.Bubb
 	return servedBy, os.clock() - started
 end
 
-function Customer.run(parent: Instance)
+local function pick<T>(list: { T }): T
+	return list[rng:NextInteger(1, #list)]
+end
+
+-- Picks a random species, maybe Sparkle, maybe wearing something.
+local function makePlush(): (PlushRig.Plush, boolean)
 	local cfg = StoreConfig.Customers
 	local sparkle = rng:NextNumber() < cfg.SparkleChance
-	local colors = if sparkle then StoreConfig.Species.SparkleBunny else StoreConfig.Species.Bunny
-	local plush = PlushModel.build(colors, sparkle)
+	local wearsSomething = rng:NextNumber() < cfg.AccessoryChance
+	local plush = PlushRig.build(pick(cfg.SpeciesPool), {
+		Sparkle = sparkle,
+		Accessory = if wearsSomething then pick(Accessories.Kinds) else nil,
+		AccessoryColor = pick(PlushSpecies.AccessoryColors),
+	}, rng)
+	return plush, sparkle
+end
+
+function Customer.run(parent: Instance)
+	local cfg = StoreConfig.Customers
+	local plush, sparkle = makePlush()
 	local model, head, body = plush.Model, plush.Head, plush.Body
 
 	CustomerMover.place(model, cfg.SpawnPosition, cfg.DoorPosition - cfg.SpawnPosition)
 	model.Parent = parent
+	Blink.start(model, plush.Eyes, rng)
 	local bubble = SpeechBubble.create(head)
 
 	-- Arrive
@@ -80,7 +99,7 @@ function Customer.run(parent: Instance)
 	-- Order
 	bubble.say("One " .. StoreConfig.Items[ORDER].DisplayName .. ", please!")
 	Feedback.sound("Squeak", head.Position)
-	local prompt = addServePrompt(body, if sparkle then "Sparkle Bunny" else "Bunny")
+	local prompt = addServePrompt(body, plush.DisplayName)
 	local servedBy, waited = waitToBeServed(prompt, bubble, head)
 	prompt:Destroy()
 	bubble.setPatience(nil)
