@@ -25,6 +25,7 @@ StoreConfig.Layout = {
 	RamenX = 2,
 	StaffDoorX = 20,
 	ManagerSpot = Vector3.new(20, 0, -15.5), -- Manager Mochi stands in front of the staff door
+	ManagerCamera = Vector3.new(13.5, 7.5, -6), -- intro close-up: from the aisle, looking past the shelf end
 	WindowBar = { FromX = -25, ToX = -7 }, -- a counter with stools along the front window
 	CeilingLights = { X = { -21, -7, 7, 21 }, Z = { -12, -1, 10 } },
 	StringLightSpacing = 2.5,

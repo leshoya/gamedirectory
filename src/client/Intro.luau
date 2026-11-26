@@ -21,9 +21,9 @@ local playing = false
 local function shots(manager: Model): { Shot }
 	local m = manager:GetPivot().Position
 	local face = m + Vector3.new(0, 6.5, 0)
-	local close = m + Vector3.new(-3, 7, 10)
-	local reg = StoreConfig.Register.Position
 	local L = StoreConfig.Layout
+	local close = L.ManagerCamera
+	local reg = StoreConfig.Register.Position
 	local breaker = StoreConfig.Power.BreakerPosition
 	return {
 		{ Text = "Oh! You must be the new night-shift hire. Welcome to Plushie Mart! I'm Manager Mochi.", Camera = close, LookAt = face },
@@ -33,7 +33,7 @@ local function shots(manager: Model): { Shot }
 		{ Text = "But after midnight... some customers aren't quite right. An extra ear. The wrong color. A smile stitched too wide.", Camera = m + Vector3.new(2, 5, 6), LookAt = face },
 		{ Text = "If something's wrong, never serve it. Press F: 'Sorry, we're closed.' Each one you spot fills a page in your Rulebook.", Camera = reg + Vector3.new(4, 6, 11), LookAt = reg + Vector3.new(0, 4, 4) },
 		{ Text = "Mistakes fill the Dread meter. If it fills, the lights go out. Hold E at the breaker by the door before they get close.", Camera = breaker + Vector3.new(-9, 4, -6), LookAt = breaker + Vector3.new(0, 3, 0) },
-		{ Text = "Survive five nights and you'll see the sunrise. Good luck! And... try not to stay late.", Camera = close + Vector3.new(0, -1, -3), LookAt = face },
+		{ Text = "Survive five nights and you'll see the sunrise. Good luck! And... try not to stay late.", Camera = close + Vector3.new(1.5, -1, -2), LookAt = face },
 	}
 end
 
