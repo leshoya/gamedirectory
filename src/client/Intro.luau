@@ -8,6 +8,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local StoreConfig = require(ReplicatedStorage.Shared.StoreConfig)
 local Ui = require(script.Parent.Ui)
+local OpeningCutscene = require(script.Parent.OpeningCutscene)
 
 local C = StoreConfig.Colors
 
@@ -26,9 +27,9 @@ local function shots(manager: Model): { Shot }
 	local reg = StoreConfig.Register.Position
 	local breaker = StoreConfig.Power.BreakerPosition
 	return {
-		{ Text = "Oh! You must be the new night-shift hire. Welcome to Plushie Mart! I'm Manager Mochi.", Camera = close, LookAt = face },
+		{ Text = "Oh! You saw the sign? Wonderful! You're hired, starting tonight. Welcome to Plushie Mart! I'm Manager Mochi.", Camera = close, LookAt = face },
 		{ Text = "Our customers are plushies from all over town. They come to the register and order bubble tea or hot ramen.", Camera = reg + Vector3.new(6, 7, 12), LookAt = reg + Vector3.new(0, 3, 2) },
-		{ Text = "Make drinks at the bubble tea bar and ramen at the hot water station. Hold E to make one.", Camera = Vector3.new(L.BubbleTeaX + 9, 8, -6), LookAt = Vector3.new(L.BubbleTeaX + 9, 4, -18) },
+		{ Text = "At the bubble tea bar you shake milk tea and taro, and whisk matcha by hand. Faster means fancier, and fancier means bigger tips! Ramen just needs hot water.", Camera = Vector3.new(L.BubbleTeaX + 9, 8, -6), LookAt = Vector3.new(L.BubbleTeaX + 9, 4, -18) },
 		{ Text = "Bring the order to the customer and press E to serve them. Fast service and streaks earn extra tips!", Camera = reg + Vector3.new(-2, 6, 12), LookAt = reg + Vector3.new(2, 4, 3) },
 		{ Text = "But after midnight... some customers aren't quite right. An extra ear. The wrong color. A smile stitched too wide.", Camera = m + Vector3.new(2, 5, 6), LookAt = face },
 		{ Text = "If something's wrong, never serve it. Press F: 'Sorry, we're closed.' Each one you spot fills a page in your Rulebook.", Camera = reg + Vector3.new(4, 6, 11), LookAt = reg + Vector3.new(0, 4, 4) },
@@ -64,13 +65,7 @@ function Intro.play()
 	local gui = Ui.screen("Intro", 10)
 
 	-- Hide the regular HUD while the manager talks.
-	local hidden = {}
-	for _, other in Players.LocalPlayer.PlayerGui:GetChildren() do
-		if other:IsA("ScreenGui") and other ~= gui and other.Enabled then
-			other.Enabled = false
-			table.insert(hidden, other)
-		end
-	end
+	local showHud = Ui.hideHud()
 
 	local box = Ui.panel(gui, "Dialogue", UDim2.new(0.6, 0, 0, 190), UDim2.new(0.5, 0, 1, -24), Vector2.new(0.5, 1))
 	local nameTag = Ui.panel(box, "Name", UDim2.fromOffset(220, 40), UDim2.fromOffset(20, -24))
@@ -114,9 +109,7 @@ function Intro.play()
 	end
 
 	gui:Destroy()
-	for _, other in hidden do
-		other.Enabled = true
-	end
+	showHud()
 	camera.CameraType = Enum.CameraType.Custom
 	local character = Players.LocalPlayer.Character
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
@@ -128,7 +121,7 @@ function Intro.play()
 	remote:FireServer()
 end
 
--- Plays the intro for workers who haven't seen it, once their saved data has loaded.
+-- New workers get the opening cutscene, then the manager's welcome, once their saved data has loaded.
 function Intro.init()
 	local player = Players.LocalPlayer
 	while player:GetAttribute("SeenIntro") == nil do
@@ -139,6 +132,7 @@ function Intro.init()
 			player.CharacterAdded:Wait()
 		end
 		task.wait(1)
+		OpeningCutscene.play()
 		Intro.play()
 	end
 end
