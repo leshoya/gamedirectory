@@ -13,13 +13,14 @@ type Message = {
 	Style: string?,
 	Position: Vector3?,
 	Color: Color3?,
+	Speed: number?,
 }
 
 local FeedbackClient = {}
 
 local function handle(message: Message)
 	if message.Kind == "Sound" and message.Name then
-		Sounds.play(message.Name, message.Position)
+		Sounds.play(message.Name, message.Position, message.Speed)
 	elseif message.Kind == "Popup" and message.Text and message.Position then
 		Popups.show(message.Text, message.Position, message.Color or Color3.new(1, 1, 1))
 	elseif message.Kind == "Burst" and message.Style and message.Position then

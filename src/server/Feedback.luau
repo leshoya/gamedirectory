@@ -23,8 +23,9 @@ local remote = getRemote()
 local Feedback = {}
 
 -- Plays a sound from StoreConfig.Sounds; at a position if given, otherwise everywhere.
-function Feedback.sound(name: string, position: Vector3?)
-	remote:FireAllClients({ Kind = "Sound", Name = name, Position = position })
+-- `speed` scales its playback speed (slow and low for the Off-Key anomaly).
+function Feedback.sound(name: string, position: Vector3?, speed: number?)
+	remote:FireAllClients({ Kind = "Sound", Name = name, Position = position, Speed = speed })
 end
 
 -- Floating text that rises and fades, like "+12" or "Speedy!".

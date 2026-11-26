@@ -12,6 +12,9 @@ export type Store = {
 	Model: Model,
 	Register: RegisterModel.RegisterParts,
 	Shaker: BasePart,
+	HotWater: BasePart,
+	Breaker: BasePart,
+	Ceiling: Instance,
 }
 
 local StoreBuilder = {}
@@ -48,7 +51,14 @@ function StoreBuilder.build(): Store
 	store.Parent = workspace
 
 	StoreLighting.apply()
-	return { Model = store, Register = register, Shaker = fixtures.Shaker }
+	return {
+		Model = store,
+		Register = register,
+		Shaker = fixtures.Shaker,
+		HotWater = fixtures.HotWater,
+		Breaker = fixtures.Breaker,
+		Ceiling = store:FindFirstChild("Ceiling") :: Instance,
+	}
 end
 
 return StoreBuilder

@@ -65,7 +65,9 @@ local function buildWalls(parent: Instance)
 			C.Window,
 			Enum.Material.Glass
 		)
-		window.Transparency = 0.6
+		-- Keep this at 0.2 or below: the player camera passes through more see-through parts,
+		-- and would end up outside the store looking in through dark glass.
+		window.Transparency = 0.2
 	end
 	PartFactory.box(
 		walls,

@@ -24,11 +24,12 @@ local function makeSound(name: string): Sound?
 	return sound
 end
 
-function Sounds.play(name: string, position: Vector3?)
+function Sounds.play(name: string, position: Vector3?, speed: number?)
 	local sound = makeSound(name)
 	if not sound then
 		return
 	end
+	sound.PlaybackSpeed *= speed or 1
 	if position then
 		local attachment = Instance.new("Attachment")
 		attachment.WorldPosition = position

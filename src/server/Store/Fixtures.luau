@@ -103,17 +103,31 @@ local function buildBubbleTea(parent: Instance): BasePart
 	return PartFactory.box(station, "Shaker", Vector3.new(1.6, 1.8, 1.2), Vector3.new(x + 3, topY, BACK_Z + 1.5), C.Trim)
 end
 
-local function buildRamen(parent: Instance)
+local function buildRamen(parent: Instance): BasePart
 	local x = 4
 	local station, topY = buildStation(parent, "RamenStation", "HOT RAMEN", x, 8)
-	PartFactory.box(station, "HotWater", Vector3.new(1.6, 2, 1.4), Vector3.new(x - 2, topY, BACK_Z + 1.5), C.Fridge)
+	local hotWater = PartFactory.box(station, "HotWater", Vector3.new(1.6, 2, 1.4), Vector3.new(x - 2, topY, BACK_Z + 1.5), C.Fridge)
 	for i = 0, 2 do
 		PartFactory.cup(station, "RamenCup", 0.8, 1.1, Vector3.new(x + 1.5, topY + i * 0.8, BACK_Z + 1.5), Color3.fromRGB(255, 215, 150))
 	end
+	return hotWater
+end
+
+-- The breaker box on the right wall: reset it when the power goes out.
+local function buildBreaker(parent: Instance): BasePart
+	local at = StoreConfig.Power.BreakerPosition
+	local box = model(parent, "Breaker")
+	local panel = PartFactory.box(box, "Panel", Vector3.new(0.4, 1.8, 1.3), Vector3.new(at.X, FLOOR_Y + 3.4, at.Z), C.Register)
+	PartFactory.box(box, "Lever", Vector3.new(0.3, 0.5, 0.2), Vector3.new(at.X - 0.3, FLOOR_Y + 4.1, at.Z), C.Neon)
+	local sign = PartFactory.box(box, "Sign", Vector3.new(0.1, 0.5, 1.6), Vector3.new(at.X - 0.1, FLOOR_Y + 5.5, at.Z), C.CounterTop)
+	PartFactory.label(sign, Enum.NormalId.Left, "BREAKER", C.SignText) -- the Left face points into the store (-X)
+	return panel
 end
 
 export type FixtureParts = {
 	Shaker: BasePart,
+	HotWater: BasePart,
+	Breaker: BasePart,
 }
 
 function Fixtures.build(parent: Instance): FixtureParts
@@ -123,8 +137,9 @@ function Fixtures.build(parent: Instance): FixtureParts
 	buildShelf(fixtures, 11, -1, 12, rng)
 	buildFridge(fixtures)
 	local shaker = buildBubbleTea(fixtures)
-	buildRamen(fixtures)
-	return { Shaker = shaker }
+	local hotWater = buildRamen(fixtures)
+	local breaker = buildBreaker(fixtures)
+	return { Shaker = shaker, HotWater = hotWater, Breaker = breaker }
 end
 
 return Fixtures

@@ -26,8 +26,9 @@ function CustomerMover.place(model: Model, position: Vector3, facing: Vector3)
 end
 
 -- Walks in a straight line to the target. Yields until it arrives (or the model is removed).
-function CustomerMover.walkTo(model: Model, target: Vector3)
+function CustomerMover.walkTo(model: Model, target: Vector3, speed: number?)
 	local cfg = StoreConfig.Customers
+	local walkSpeed = speed or cfg.WalkSpeed
 	local goal = onFloor(target)
 	local position = onFloor(model:GetPivot().Position)
 	local elapsed = 0
@@ -37,7 +38,7 @@ function CustomerMover.walkTo(model: Model, target: Vector3)
 		elapsed += dt
 		local toGoal = goal - position
 		local distance = toGoal.Magnitude
-		local step = cfg.WalkSpeed * dt
+		local step = walkSpeed * dt
 		if distance <= step then
 			CustomerMover.place(model, goal, if distance > 0.01 then toGoal else flatLook(model))
 			return
@@ -50,10 +51,30 @@ function CustomerMover.walkTo(model: Model, target: Vector3)
 	end
 end
 
-function CustomerMover.walkPath(model: Model, points: { Vector3 })
+function CustomerMover.walkPath(model: Model, points: { Vector3 }, speed: number?)
 	for _, point in points do
-		CustomerMover.walkTo(model, point)
+		CustomerMover.walkTo(model, point, speed)
 	end
+end
+
+-- Keeps turning the model to face the nearest player until it's removed or `stop()` returns true.
+function CustomerMover.stare(model: Model, stop: () -> boolean)
+	task.spawn(function()
+		while model.Parent and not stop() do
+			local at = model:GetPivot().Position
+			local best, bestDistance = nil, 40
+			for _, player in game:GetService("Players"):GetPlayers() do
+				local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart") :: BasePart?
+				if root and (root.Position - at).Magnitude < bestDistance then
+					best, bestDistance = root, (root.Position - at).Magnitude
+				end
+			end
+			if best then
+				CustomerMover.face(model, best.Position)
+			end
+			task.wait(0.1)
+		end
+	end)
 end
 
 -- Turns in place to face a point.

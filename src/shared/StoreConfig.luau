@@ -64,7 +64,7 @@ StoreConfig.Lighting = {
 	CeilingLightRange = 20,
 }
 
-export type Item = { DisplayName: string, CupColor: Color3 }
+export type Item = { DisplayName: string, CupColor: Color3, Style: "Cup" | "Bowl" }
 export type Sound = { Id: number, Volume: number, Speed: number? }
 
 -- Things a worker can carry and a customer can order.
@@ -72,12 +72,23 @@ StoreConfig.Items = {
 	BubbleTea = {
 		DisplayName = "bubble tea",
 		CupColor = Color3.fromRGB(230, 200, 170), -- milk tea
+		Style = "Cup",
+	},
+	Ramen = {
+		DisplayName = "hot ramen",
+		CupColor = Color3.fromRGB(255, 215, 150),
+		Style = "Bowl",
 	},
 } :: { [string]: Item }
 
+-- Stations where workers make items. MakeTime is how long to hold E (halved by the Turbo Shaker).
 StoreConfig.BubbleTea = {
 	PromptDistance = 6,
-	MakeTime = 1, -- seconds to hold E at the shaker
+	MakeTime = 1,
+}
+StoreConfig.Ramen = {
+	PromptDistance = 6,
+	MakeTime = 2,
 }
 
 -- Plush customers. Positions are on the floor (Y is ignored).
@@ -88,10 +99,13 @@ StoreConfig.Customers = {
 	WalkSpeed = 7, -- studs per second
 	HopHeight = 0.35,
 	HopRate = 9, -- hops per second while walking
-	Patience = 60, -- seconds a customer waits before giving up
-	FirstDelay = 3, -- seconds after the server starts before the first customer
-	SpawnDelay = 6, -- seconds between one customer leaving and the next arriving
+	Patience = 35, -- seconds a customer waits before giving up (+25% with Comfy Mats)
 	ReplyTime = 2, -- seconds a reply bubble ("Thank you!") stays up before they leave
+	LeaveSlowSpeed = 2.5, -- turned-away anomalies leave slowly, still smiling
+	Menu = { "BubbleTea", "Ramen" }, -- what normal customers order
+	Payments = { "coins", "a card", "exact change", "shiny coins" }, -- what normal customers pay with
+	-- Served anomalies don't leave: they stand in the aisle, watching, until the night ends.
+	LingerSpots = { Vector3.new(7.5, 0, -5), Vector3.new(7.5, 0, 0), Vector3.new(7.5, 0, 4), Vector3.new(15, 0, 7) },
 	PromptDistance = 7,
 	BubbleMaxDistance = 60,
 	SparkleChance = 0.1, -- chance a customer is a rare Sparkle plush
@@ -117,6 +131,78 @@ StoreConfig.Tips = {
 	FastBonus = 5,
 	StreakStep = 0.1, -- each customer served in a row adds +10% to tips
 	StreakMaxBonus = 1, -- capped at +100%
+	TurnAwayBonus = 15, -- turning away an anomaly
+	TurnAwayPenalty = 5, -- turning away a real customer
+	NightBonus = 25, -- everyone, for surviving a night
+	ShiftBonus = 100, -- everyone, for surviving all five
+	TipJarBonus = 0.1, -- the Heart Tip Jar upgrade
+}
+
+-- The five nights of a shift. More customers and more anomalies each night.
+StoreConfig.Nights = {
+	{ Customers = 6, AnomalyChance = 0 },
+	{ Customers = 8, AnomalyChance = 0.2 },
+	{ Customers = 10, AnomalyChance = 0.3 },
+	{ Customers = 12, AnomalyChance = 0.4, PowerCuts = true },
+	{ Customers = 14, AnomalyChance = 0.5, PowerCuts = true },
+}
+
+StoreConfig.Shift = {
+	FirstDelay = 8, -- seconds after the server starts before night 1 opens
+	OpenTime = 10, -- workers take their stations
+	ServiceTime = 180, -- customers arrive
+	CloseTime = 12, -- the night's summary card
+	BreakTime = 25, -- between shifts (after a win or a loss)
+	CustomerGap = 2, -- seconds between one customer leaving and the next arriving
+	ExtraCustomersPerPlayer = 1, -- more players, a little busier
+	ExtraAnomalyPerPlayer = 0.03,
+}
+
+-- Dread fills from mistakes and drains slowly. Full Dread means a blackout.
+StoreConfig.Dread = {
+	Max = 100,
+	DrainPerSecond = 0.4, -- doubled by Brighter Lights
+	ServedAnomaly = 35,
+	TurnedAwayCustomer = 10,
+	CustomerLeft = 8, -- a real customer gave up waiting
+	PowerCutPerSecond = 1, -- while the lights are out on nights 4-5
+	AfterBlackout = 50, -- where Dread lands if the team resets the breaker in time
+}
+
+-- Power cuts (nights 4-5) and the blackout.
+StoreConfig.Power = {
+	CutEvery = { 35, 60 }, -- seconds between power cuts, random in this range
+	ResetHold = 2, -- seconds to hold E at the breaker
+	BreakerPosition = Vector3.new(19.4, 0, 9), -- on the right wall near the door (Y is height above floor: 4)
+	OutageAmbient = Color3.fromRGB(18, 14, 26),
+	BlackoutTime = 20, -- seconds to reset the breaker when Dread fills
+	FlickerEvery = 2.5, -- seconds between flickers during the blackout
+	Stalkers = 3, -- plushes that creep closer each flicker
+	StalkerStep = 3, -- studs closer each flicker
+}
+
+-- Saved progress. Bump the store name to wipe everyone's data.
+StoreConfig.Data = {
+	StoreName = "MidnightPlushieMart_v1",
+	AutosaveEvery = 120,
+}
+
+-- Robux items and badges. 0 means "not set up yet": the shop shows Coming soon, nothing is sold.
+StoreConfig.Monetization = {
+	Passes = {
+		DoubleTips = 0,
+		VIP = 0,
+	},
+	Products = {
+		IdolJacket = 0,
+		StarStick = 0,
+		SecondChance = 0, -- retry a failed blackout once per shift
+		RulebookHint = 0, -- reveals one unseen anomaly's tell
+	},
+	Badges = {
+		FirstShift = 0, -- survived all five nights
+		RulebookComplete = 0,
+	},
 }
 
 -- Sound effects, by name. Ids are free Creator Store audio that loaded in Studio.

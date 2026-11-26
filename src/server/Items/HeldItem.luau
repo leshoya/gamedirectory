@@ -1,5 +1,5 @@
 --!strict
--- One item a worker carries in their right hand (a bubble tea cup for now).
+-- One item a worker carries in their right hand: a bubble tea cup or a ramen bowl.
 -- The player's "Holding" attribute names the item; the cup model is welded to the hand.
 
 local Players = game:GetService("Players")
@@ -59,6 +59,47 @@ local function buildCup(hand: BasePart, color: Color3): Model
 	return model
 end
 
+-- A ramen bowl with noodles and chopsticks, held level just below the hand.
+local function buildBowl(hand: BasePart, color: Color3): Model
+	local model = Instance.new("Model")
+	model.Name = MODEL_NAME
+	local level = CFrame.Angles(0, 0, math.rad(90)) -- cylinders run along X
+	local bowlOffset = CFrame.new(0, -hand.Size.Y / 2 - 0.25, -0.45)
+
+	local bowl = PartFactory.part({
+		Name = "Bowl",
+		Shape = Enum.PartType.Cylinder,
+		Size = Vector3.new(0.55, 1.2, 1.2),
+		CFrame = CFrame.new(),
+		Color = color,
+	})
+	weldTo(hand, bowl, bowlOffset * level)
+	bowl.Parent = model
+
+	local noodles = PartFactory.part({
+		Name = "Noodles",
+		Shape = Enum.PartType.Cylinder,
+		Size = Vector3.new(0.1, 1.0, 1.0),
+		CFrame = CFrame.new(),
+		Color = Color3.fromRGB(255, 240, 190),
+		Material = Enum.Material.Fabric,
+	})
+	weldTo(hand, noodles, bowlOffset * CFrame.new(0, 0.25, 0) * level)
+	noodles.Parent = model
+
+	for side = -1, 1, 2 do
+		local stick = PartFactory.part({
+			Name = "Chopstick",
+			Size = Vector3.new(0.07, 1.1, 0.07),
+			CFrame = CFrame.new(),
+			Color = Color3.fromRGB(255, 150, 190),
+		})
+		weldTo(hand, stick, bowlOffset * CFrame.new(side * 0.08, 0.6, 0.2) * CFrame.Angles(math.rad(-20), 0, 0))
+		stick.Parent = model
+	end
+	return model
+end
+
 function HeldItem.get(player: Player): string?
 	return player:GetAttribute(ATTRIBUTE) :: string?
 end
@@ -71,7 +112,8 @@ function HeldItem.give(player: Player, itemName: string): boolean
 	if not item or not hand or HeldItem.get(player) then
 		return false
 	end
-	buildCup(hand, item.CupColor).Parent = character
+	local model = if item.Style == "Bowl" then buildBowl(hand, item.CupColor) else buildCup(hand, item.CupColor)
+	model.Parent = character
 	player:SetAttribute(ATTRIBUTE, itemName)
 	return true
 end

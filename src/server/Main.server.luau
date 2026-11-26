@@ -1,16 +1,56 @@
 --!strict
--- Entry point: builds the store, turns on its stations, and opens the doors to customers.
+-- Entry point: builds the store, loads players' saved progress, turns on the stations and
+-- the shop, and starts the night shift.
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StoreConfig = require(ReplicatedStorage.Shared.StoreConfig)
 local StoreBuilder = require(script.Parent.Store.StoreBuilder)
-local RegisterStation = require(script.Parent.Stations.RegisterStation)
-local BubbleTeaStation = require(script.Parent.Stations.BubbleTeaStation)
-local HeldItem = require(script.Parent.Items.HeldItem)
+local Decor = require(script.Parent.Store.Decor)
+local PlayerData = require(script.Parent.Data.PlayerData)
 local Tips = require(script.Parent.Economy.Tips)
-local CustomerSpawner = require(script.Parent.Customers.CustomerSpawner)
+local Upgrades = require(script.Parent.Economy.Upgrades)
+local Inventory = require(script.Parent.Economy.Inventory)
+local Shop = require(script.Parent.Economy.Shop)
+local Monetization = require(script.Parent.Economy.Monetization)
+local Cosmetics = require(script.Parent.Cosmetics.Cosmetics)
+local Rulebook = require(script.Parent.Progress.Rulebook)
+local HeldItem = require(script.Parent.Items.HeldItem)
+local RegisterStation = require(script.Parent.Stations.RegisterStation)
+local MakerStation = require(script.Parent.Stations.MakerStation)
+local Power = require(script.Parent.Shift.Power)
+local NightController = require(script.Parent.Shift.NightController)
 
 local store = StoreBuilder.build()
-HeldItem.init()
+
+-- Saved progress and the economy
+PlayerData.init()
 Tips.init()
+Upgrades.init()
+Inventory.init()
+Rulebook.init()
+Shop.init()
+Monetization.init()
+Cosmetics.init()
+Upgrades.onChanged(function()
+	Decor.setStickers(Upgrades.has("StickerWall"))
+end)
+
+-- Stations
+HeldItem.init()
 RegisterStation.init(store.Register)
-BubbleTeaStation.init(store.Shaker)
-CustomerSpawner.start()
+MakerStation.init(store.Shaker, {
+	Item = "BubbleTea",
+	Config = StoreConfig.BubbleTea,
+	ObjectText = "Shaker",
+	ActionText = "Make bubble tea",
+})
+MakerStation.init(store.HotWater, {
+	Item = "Ramen",
+	Config = StoreConfig.Ramen,
+	ObjectText = "Hot water",
+	ActionText = "Make hot ramen",
+})
+
+-- The shift
+Power.init(store.Ceiling, store.Breaker)
+NightController.start()
