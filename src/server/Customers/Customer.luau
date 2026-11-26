@@ -119,6 +119,7 @@ function Customer.run(parent: Instance, ctx: Context)
 	local turnAway = addPrompt(body, "Something's wrong?", "Sorry, we're closed", Enum.KeyCode.F, Enum.KeyCode.ButtonY, 110)
 	local kind: "Served" | "TurnedAway" | "Left" | "Closed" = "Left"
 	local by: Player? = nil
+	local quality: string? = nil
 
 	local serveConnection = serve.Triggered:Connect(function(player: Player)
 		if by then
@@ -127,6 +128,7 @@ function Customer.run(parent: Instance, ctx: Context)
 		local holding = HeldItem.get(player)
 		-- Anomalies take whatever they're handed; real customers want what they ordered.
 		if holding and (anomaly or holding == order) then
+			quality = HeldItem.quality(player)
 			HeldItem.take(player)
 			kind, by = "Served", player
 		else
@@ -163,6 +165,7 @@ function Customer.run(parent: Instance, ctx: Context)
 		Anomaly = anomaly and anomaly.Id,
 		Waited = os.clock() - started,
 		Sparkle = sparkle,
+		Quality = quality,
 		Position = head.Position,
 	})
 

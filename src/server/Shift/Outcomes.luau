@@ -17,6 +17,7 @@ export type Outcome = {
 	Anomaly: string?, -- anomaly id, if the customer was one
 	Waited: number,
 	Sparkle: boolean,
+	Quality: string?, -- how well the drink was made: "Perfect", "Good" or "Okay"
 	Position: Vector3, -- the customer's head, for popups
 }
 
@@ -35,7 +36,15 @@ function Outcomes.apply(outcome: Outcome)
 			NightStats.add("Mistakes")
 			Feedback.popup("That wasn't a real customer...", at + Vector3.new(0, 3, 0), fx.Bad)
 		else
-			local paid = Tips.forServe(player, outcome.Waited, if outcome.Sparkle then cfg.Customers.SparkleTipMultiplier else 1, at)
+			local multiplier = if outcome.Sparkle then cfg.Customers.SparkleTipMultiplier else 1
+			local quality = outcome.Quality
+			if quality then
+				multiplier *= (cfg.Drinks.QualityTips :: any)[quality] or 1
+				if quality == "Perfect" then
+					Feedback.popup("Perfect drink!", at + Vector3.new(0, 4.5, 0), fx.TipGold)
+				end
+			end
+			local paid = Tips.forServe(player, outcome.Waited, multiplier, at)
 			NightStats.add("Served")
 			NightStats.add("Tips", paid)
 		end
