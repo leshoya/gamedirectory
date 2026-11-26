@@ -204,6 +204,25 @@ local function runShift()
 	StoreLighting.apply()
 end
 
+-- New workers are still watching the opening cutscene and the manager's welcome: give them
+-- a chance to finish before customers start arriving (up to OnboardingWait seconds).
+local function waitForNewWorkers()
+	local deadline = os.clock() + StoreConfig.Shift.OnboardingWait
+	while os.clock() < deadline do
+		local busy = false
+		for _, player in Players:GetPlayers() do
+			if player:GetAttribute("SeenIntro") ~= true then
+				busy = true
+			end
+		end
+		if not busy then
+			return
+		end
+		setPhase("Waiting")
+		task.wait(1)
+	end
+end
+
 function NightController.start()
 	Dread.init(onDreadFull, Power.isOut)
 	Dread.setPaused(true)
@@ -215,6 +234,7 @@ function NightController.start()
 				setPhase("Waiting")
 				task.wait(1)
 			end
+			waitForNewWorkers()
 			runShift()
 		end
 	end)
