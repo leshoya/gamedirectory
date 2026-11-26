@@ -79,6 +79,26 @@ function Ui.popIn(frame: GuiObject)
 	TweenService:Create(scale, POP, { Scale = 1 }):Play()
 end
 
+-- Hides this game's HUD screens (not Roblox's own, like proximity prompts) for a cutscene.
+-- Returns a function that shows them again.
+local HUD = { "ShiftHud", "TipHud", "Menu", "Results" }
+function Ui.hideHud(): () -> ()
+	local hidden = {}
+	local playerGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+	for _, name in HUD do
+		local gui = playerGui:FindFirstChild(name)
+		if gui and gui:IsA("ScreenGui") and gui.Enabled then
+			gui.Enabled = false
+			table.insert(hidden, gui)
+		end
+	end
+	return function()
+		for _, gui in hidden do
+			gui.Enabled = true
+		end
+	end
+end
+
 function Ui.screen(name: string, order: number?): ScreenGui
 	local gui = Instance.new("ScreenGui")
 	gui.Name = name
