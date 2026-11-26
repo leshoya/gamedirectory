@@ -18,7 +18,7 @@ local Catalog = {}
 
 Catalog.Items = {
 	-- Store upgrades. Shared: if anyone in the server owns one, the whole store gets it.
-	{ Id = "FasterShaker", Kind = "Upgrade", Name = "Turbo Shaker", Description = "Bubble tea and ramen take half as long.", Price = 150 },
+	{ Id = "FasterShaker", Kind = "Upgrade", Name = "Turbo Shaker", Description = "Less shaking and whisking, and ramen in half the time.", Price = 150 },
 	{ Id = "BrighterLights", Kind = "Upgrade", Name = "Brighter Lights", Description = "Dread drains twice as fast.", Price = 250 },
 	{ Id = "ComfyMats", Kind = "Upgrade", Name = "Comfy Floor Mats", Description = "Customers wait 25% longer.", Price = 200 },
 	{ Id = "TipJar", Kind = "Upgrade", Name = "Heart Tip Jar", Description = "Everyone earns 10% more tips.", Price = 400 },

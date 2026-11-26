@@ -93,15 +93,28 @@ StoreConfig.Lighting = {
 	CeilingLightRange = 20,
 }
 
-export type Item = { DisplayName: string, CupColor: Color3, Style: "Cup" | "Bowl" }
+export type Item = { DisplayName: string, CupColor: Color3, Style: "Cup" | "Bowl", Making: ("Shake" | "Whisk")? }
 export type Sound = { Id: number, Volume: number, Speed: number? }
 
--- Things a worker can carry and a customer can order.
+-- Things a worker can carry and a customer can order. Drinks with Making are made in a minigame.
 StoreConfig.Items = {
-	BubbleTea = {
-		DisplayName = "bubble tea",
-		CupColor = Color3.fromRGB(230, 200, 170), -- milk tea
+	MilkTea = {
+		DisplayName = "milk tea",
+		CupColor = Color3.fromRGB(230, 200, 170),
 		Style = "Cup",
+		Making = "Shake",
+	},
+	TaroTea = {
+		DisplayName = "taro milk tea",
+		CupColor = Color3.fromRGB(200, 170, 240),
+		Style = "Cup",
+		Making = "Shake",
+	},
+	Matcha = {
+		DisplayName = "matcha latte",
+		CupColor = Color3.fromRGB(170, 215, 140),
+		Style = "Cup",
+		Making = "Whisk",
 	},
 	Ramen = {
 		DisplayName = "hot ramen",
@@ -110,11 +123,18 @@ StoreConfig.Items = {
 	},
 } :: { [string]: Item }
 
--- Stations where workers make items. MakeTime is how long to hold E (halved by the Turbo Shaker).
-StoreConfig.BubbleTea = {
+-- Drink minigames at the bubble tea bar. Finish faster for a better drink and bigger tips.
+StoreConfig.Drinks = {
 	PromptDistance = 6,
-	MakeTime = 1,
+	Shake = { Target = 24, TimeLimit = 7, PerfectTime = 3.5, GoodTime = 5 }, -- alternating A/D presses
+	Whisk = { Target = 6, TimeLimit = 9, PerfectTime = 4.5, GoodTime = 6.5 }, -- full circles
+	SpillBelow = 0.5, -- out of time below this much progress: the drink spills
+	TurboEffort = 0.7, -- the Turbo Shaker upgrade cuts the work to 70%
+	MinTime = 1.2, -- the server ignores drinks "made" faster than this
+	QualityTips = { Perfect = 1.5, Good = 1.2, Okay = 1 },
 }
+
+-- Hold-to-make stations. MakeTime is how long to hold E (halved by the Turbo Shaker).
 StoreConfig.Ramen = {
 	PromptDistance = 6,
 	MakeTime = 2,
@@ -132,7 +152,7 @@ StoreConfig.Customers = {
 	Patience = 35, -- seconds a customer waits before giving up (+25% with Comfy Mats)
 	ReplyTime = 2, -- seconds a reply bubble ("Thank you!") stays up before they leave
 	LeaveSlowSpeed = 2.5, -- turned-away anomalies leave slowly, still smiling
-	Menu = { "BubbleTea", "Ramen" }, -- what normal customers order
+	Menu = { "MilkTea", "TaroTea", "Matcha", "Ramen" }, -- what normal customers order
 	Payments = { "coins", "a card", "exact change", "shiny coins" }, -- what normal customers pay with
 	-- Served anomalies don't leave: they stand in an aisle, watching, until the night ends.
 	-- They walk along the front of the aisles at LingerEntryZ, then straight down to their spot.
@@ -188,6 +208,7 @@ StoreConfig.Shift = {
 	CustomerGap = 2, -- seconds between one customer leaving and the next arriving
 	ExtraCustomersPerPlayer = 1, -- more players, a little busier
 	ExtraAnomalyPerPlayer = 0.03,
+	OnboardingWait = 150, -- seconds the first night waits for new workers to finish the intro
 }
 
 -- Dread fills from mistakes and drains slowly. Full Dread means a blackout.
