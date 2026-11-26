@@ -89,7 +89,7 @@ local function buildStation(parent: Instance, name: string, signText: string, x:
 	return station, FLOOR_Y + height + 0.3
 end
 
-local function buildBubbleTea(parent: Instance)
+local function buildBubbleTea(parent: Instance): BasePart
 	local x = -13
 	local station, topY = buildStation(parent, "BubbleTeaBar", "BUBBLE TEA", x, 10)
 	local flavors = {
@@ -100,7 +100,7 @@ local function buildBubbleTea(parent: Instance)
 	for i, color in flavors do
 		PartFactory.cup(station, "Cup", 1.4, 0.9, Vector3.new(x - 4.5 + i * 1.5, topY, BACK_Z + 1.5), color)
 	end
-	PartFactory.box(station, "Shaker", Vector3.new(1.6, 1.8, 1.2), Vector3.new(x + 3, topY, BACK_Z + 1.5), C.Trim)
+	return PartFactory.box(station, "Shaker", Vector3.new(1.6, 1.8, 1.2), Vector3.new(x + 3, topY, BACK_Z + 1.5), C.Trim)
 end
 
 local function buildRamen(parent: Instance)
@@ -112,14 +112,19 @@ local function buildRamen(parent: Instance)
 	end
 end
 
-function Fixtures.build(parent: Instance)
+export type FixtureParts = {
+	Shaker: BasePart,
+}
+
+function Fixtures.build(parent: Instance): FixtureParts
 	local fixtures = model(parent, "Fixtures")
 	local rng = Random.new(2026) -- fixed seed so the shelves look the same every run
 	buildShelf(fixtures, 4, -1, 12, rng)
 	buildShelf(fixtures, 11, -1, 12, rng)
 	buildFridge(fixtures)
-	buildBubbleTea(fixtures)
+	local shaker = buildBubbleTea(fixtures)
 	buildRamen(fixtures)
+	return { Shaker = shaker }
 end
 
 return Fixtures

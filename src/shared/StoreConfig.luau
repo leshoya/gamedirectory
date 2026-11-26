@@ -64,6 +64,85 @@ StoreConfig.Lighting = {
 	CeilingLightRange = 20,
 }
 
+export type Item = { DisplayName: string, CupColor: Color3 }
+export type Sound = { Id: number, Volume: number, Speed: number? }
+
+-- Things a worker can carry and a customer can order.
+StoreConfig.Items = {
+	BubbleTea = {
+		DisplayName = "bubble tea",
+		CupColor = Color3.fromRGB(230, 200, 170), -- milk tea
+	},
+} :: { [string]: Item }
+
+StoreConfig.BubbleTea = {
+	PromptDistance = 6,
+	MakeTime = 1, -- seconds to hold E at the shaker
+}
+
+-- Plush customers. Positions are on the floor (Y is ignored).
+StoreConfig.Customers = {
+	SpawnPosition = Vector3.new(0, 0, 24), -- out on the sidewalk
+	DoorPosition = Vector3.new(0, 0, 11), -- just inside the door
+	OrderSpot = Vector3.new(-10, 0, 7.2), -- customer side of the register
+	WalkSpeed = 7, -- studs per second
+	HopHeight = 0.35,
+	HopRate = 9, -- hops per second while walking
+	Patience = 60, -- seconds a customer waits before giving up
+	FirstDelay = 3, -- seconds after the server starts before the first customer
+	SpawnDelay = 6, -- seconds between one customer leaving and the next arriving
+	ReplyTime = 2, -- seconds a reply bubble ("Thank you!") stays up before they leave
+	PromptDistance = 7,
+	BubbleMaxDistance = 60,
+	SparkleChance = 0.1, -- chance a customer is a rare Sparkle Bunny
+	SparkleTipMultiplier = 3,
+}
+
+StoreConfig.Species = {
+	Bunny = {
+		Body = Color3.fromRGB(255, 214, 230),
+		Inner = Color3.fromRGB(255, 160, 195),
+		Eyes = Color3.fromRGB(45, 35, 60),
+	},
+	SparkleBunny = {
+		Body = Color3.fromRGB(225, 205, 255),
+		Inner = Color3.fromRGB(255, 215, 120),
+		Eyes = Color3.fromRGB(45, 35, 60),
+	},
+}
+
+-- Tips for serving. A streak is shared by the whole team and breaks when a customer leaves unserved.
+StoreConfig.Tips = {
+	Base = 10,
+	FastTime = 12, -- serve within this many seconds of the order for the speed bonus
+	FastBonus = 5,
+	StreakStep = 0.1, -- each customer served in a row adds +10% to tips
+	StreakMaxBonus = 1, -- capped at +100%
+}
+
+-- Sound effects, by name. Ids are free Creator Store audio that loaded in Studio.
+StoreConfig.Sounds = {
+	DoorChime = { Id = 9125492239, Volume = 0.35 },
+	Squeak = { Id = 9120222115, Volume = 0.6 },
+	Shake = { Id = 9116797024, Volume = 0.4, Speed = 1.3 },
+	Coin = { Id = 1169806635, Volume = 0.5 },
+	Register = { Id = 134810204798705, Volume = 0.5 },
+	Sad = { Id = 1836360707, Volume = 0.5 },
+	Sparkle = { Id = 2609981431, Volume = 0.5 },
+} :: { [string]: Sound }
+
+-- Client-side visual effects.
+StoreConfig.Effects = {
+	HeartTexture = "rbxassetid://241778280", -- white heart, tinted per burst
+	SparkleTexture = "rbxasset://textures/particles/sparkles_main.dds",
+	PopupRise = 3, -- studs a "+12" popup floats up
+	PopupTime = 1.2, -- seconds it takes to float and fade
+	SoundRange = 80, -- how far away 3D sounds can be heard
+	TipGold = Color3.fromRGB(255, 200, 70),
+	Good = Color3.fromRGB(120, 220, 170),
+	Bad = Color3.fromRGB(255, 120, 150),
+}
+
 StoreConfig.SpawnPosition = Vector3.new(0, 0, 10) -- just inside the door
 StoreConfig.SignText = "PLUSHIE MART"
 

@@ -11,6 +11,7 @@ local StoreLighting = require(script.Parent.StoreLighting)
 export type Store = {
 	Model: Model,
 	Register: RegisterModel.RegisterParts,
+	Shaker: BasePart,
 }
 
 local StoreBuilder = {}
@@ -41,13 +42,13 @@ function StoreBuilder.build(): Store
 	local store = Instance.new("Model")
 	store.Name = "Store"
 	StoreShell.build(store)
-	Fixtures.build(store)
+	local fixtures = Fixtures.build(store)
 	local register = RegisterModel.build(store)
 	buildSpawn(store)
 	store.Parent = workspace
 
 	StoreLighting.apply()
-	return { Model = store, Register = register }
+	return { Model = store, Register = register, Shaker = fixtures.Shaker }
 end
 
 return StoreBuilder
