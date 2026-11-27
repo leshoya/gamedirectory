@@ -14,6 +14,7 @@ export type Anomaly = {
 	Payment: { string }?, -- pays with something wrong
 	NeverBlinks: boolean?, -- no blinking, and turns to stare at the nearest worker
 	VoiceSpeed: number?, -- squeak playback speed (Off-Key)
+	Forgets: boolean?, -- a copy of a regular that doesn't remember you (uses its Wrong lines)
 }
 
 local Anomalies = {}
@@ -42,6 +43,14 @@ Anomalies.List = {
 		Type = "Look",
 		FirstNight = 2,
 		Look = { TooWide = true },
+	},
+	{
+		Id = "Forgotten",
+		Name = "Doesn't Remember",
+		Tell = "A regular who acts like you've never met, or keeps insisting everything is fine.",
+		Type = "Behavior",
+		FirstNight = 2,
+		Forgets = true,
 	},
 	{
 		Id = "StrangeRequest",
