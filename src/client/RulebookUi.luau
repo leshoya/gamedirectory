@@ -13,7 +13,7 @@ local RulebookUi = {}
 
 function RulebookUi.build(gui: ScreenGui): Frame
 	local player = Players.LocalPlayer
-	local panel = Ui.panel(gui, "Rulebook", UDim2.fromOffset(560, 380), UDim2.fromScale(0.5, 0.5), Vector2.new(0.5, 0.5))
+	local panel = Ui.panel(gui, "Rulebook", UDim2.fromOffset(700, 400), UDim2.fromScale(0.5, 0.5), Vector2.new(0.5, 0.5))
 	panel.BackgroundColor3 = Color3.fromRGB(255, 250, 240)
 	panel.Visible = false
 	local header = Ui.label(panel, "Rulebook", UDim2.new(1, -120, 0, 36), UDim2.fromOffset(20, 12), C.Neon, Enum.TextXAlignment.Left)
@@ -27,7 +27,7 @@ function RulebookUi.build(gui: ScreenGui): Frame
 	grid.Position = UDim2.fromOffset(20, 58)
 	grid.Parent = panel
 	local layout = Instance.new("UIGridLayout")
-	layout.CellSize = UDim2.new(0.25, -9, 0.5, -8)
+	layout.CellSize = UDim2.new(0.2, -10, 0.5, -8) -- five pages per row, two rows
 	layout.CellPadding = UDim2.fromOffset(12, 12)
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
 	layout.Parent = grid
