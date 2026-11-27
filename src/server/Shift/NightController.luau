@@ -118,6 +118,8 @@ local function runNight(night: number): boolean
 		AnomalyChance = nightCfg.AnomalyChance + (players - 1) * cfg.ExtraAnomalyPerPlayer,
 		IsOpen = isOpen,
 		Linger = linger,
+		Visited = {},
+		ExtraSpecies = (nightCfg :: any).ExtraSpecies,
 	}
 	if nightCfg.PowerCuts then
 		runPowerCuts(isOpen)

@@ -146,6 +146,7 @@ StoreConfig.Customers = {
 	HopHeight = 0.35,
 	HopRate = 9, -- hops per second while walking
 	Patience = 35, -- seconds a customer waits before giving up (+25% with Comfy Mats)
+	HelloTime = 2.2, -- seconds a hello stays up before they order
 	ReplyTime = 2, -- seconds a reply bubble ("Thank you!") stays up before they leave
 	LeaveSlowSpeed = 2.5, -- turned-away anomalies leave slowly, still smiling
 	Menu = { "MilkTea", "TaroTea", "Matcha", "Ramen" }, -- what normal customers order
@@ -190,9 +191,9 @@ StoreConfig.Tips = {
 StoreConfig.Nights = {
 	{ Customers = 6, AnomalyChance = 0 },
 	{ Customers = 8, AnomalyChance = 0.2 },
-	{ Customers = 10, AnomalyChance = 0.3 },
-	{ Customers = 12, AnomalyChance = 0.4, PowerCuts = true },
-	{ Customers = 14, AnomalyChance = 0.5, PowerCuts = true },
+	{ Customers = 10, AnomalyChance = 0.35, ExtraSpecies = { "Wolf", "Crow" } },
+	{ Customers = 12, AnomalyChance = 0.45, PowerCuts = true, ExtraSpecies = { "Wolf", "Crow" } },
+	{ Customers = 14, AnomalyChance = 0.55, PowerCuts = true, ExtraSpecies = { "Wolf", "Crow" } },
 }
 
 StoreConfig.Shift = {
