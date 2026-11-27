@@ -17,16 +17,18 @@ local HeldItem = require(script.Parent.Parent.Items.HeldItem)
 local Upgrades = require(script.Parent.Parent.Economy.Upgrades)
 local Feedback = require(script.Parent.Parent.Feedback)
 local Outcomes = require(script.Parent.Parent.Shift.Outcomes)
+local Dread = require(script.Parent.Parent.Shift.Dread)
+local Lingerer = require(script.Parent.Lingerer)
 
 export type Context = {
 	Night: number,
 	AnomalyChance: number,
 	IsOpen: () -> boolean, -- false once the night's service is over
 	Linger: Folder, -- where served anomalies wait out the night
-}
-
 	Visited: { [string]: boolean }, -- regulars who already came in tonight
 	ExtraSpecies: { string }?, -- species that only show up on later nights
+}
+
 local PATIENCE_TICK = 0.2
 
 local Customer = {}
@@ -46,8 +48,6 @@ local function makePlush(anomaly: Anomalies.Anomaly?, regular: Regulars.Regular?
 		Accessory = if rng:NextNumber() < cfg.AccessoryChance then pick(Accessories.Kinds) else nil,
 		AccessoryColor = pick(PlushSpecies.AccessoryColors),
 	}
-	if anomaly and anomaly.Look then
-		for key, on in anomaly.Look do
 	local species = pick(cfg.SpeciesPool)
 	if regular then
 		species = regular.Species
@@ -56,6 +56,8 @@ local function makePlush(anomaly: Anomalies.Anomaly?, regular: Regulars.Regular?
 	elseif ctx.ExtraSpecies and rng:NextNumber() < 0.4 then
 		species = pick(ctx.ExtraSpecies)
 	end
+	if anomaly and anomaly.Look then
+		for key, on in anomaly.Look do
 			(options :: any)[key] = on
 		end
 	end
@@ -199,6 +201,10 @@ function Customer.run(parent: Instance, ctx: Context)
 	while not by and os.clock() - started < patience and ctx.IsOpen() do
 		bubble.setPatience(1 - (os.clock() - started) / patience)
 		task.wait(PATIENCE_TICK)
+		if anomaly then
+			-- Something wrong standing at the counter makes the whole store feel worse.
+			Dread.add(StoreConfig.Dread.AnomalyWaitingPerSecond * PATIENCE_TICK)
+		end
 	end
 	if not by and not ctx.IsOpen() then
 		kind = "Closed"
@@ -223,15 +229,14 @@ function Customer.run(parent: Instance, ctx: Context)
 	-- React and leave
 	local exit = { cfg.DoorPosition, cfg.SpawnPosition }
 	if kind == "Served" and anomaly then
-		bubble.say("Thank you. I think I'll stay.")
+		bubble.say(if regular then lines.Thanks else "Thank you. I think I'll stay.")
+		Feedback.jumpscare(by, model, "Small")
 		task.wait(cfg.ReplyTime)
 		bubble.hide()
 		model.Parent = ctx.Linger
 		local spot = freeLingerSpot(ctx.Linger)
 		CustomerMover.walkPath(model, { Vector3.new(spot.X, 0, cfg.LingerEntryZ), spot }, cfg.LeaveSlowSpeed)
-		CustomerMover.stare(model, function()
-			return false
-		end)
+		Lingerer.start(model) -- it creeps closer whenever nobody is looking
 		return -- it stays until the night ends
 	elseif kind == "Served" then
 		bubble.say(if regular then lines.Thanks elseif sparkle then "Sparkly thanks!" else "Thank you!")
