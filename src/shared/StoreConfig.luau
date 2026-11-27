@@ -293,8 +293,19 @@ StoreConfig.Sounds = {
 -- Background sound in the store. The music box slows and drops in pitch as Dread rises,
 -- and goes quiet when the power is out. (APM music and a loopable hum, both free on the Creator Store.)
 StoreConfig.Ambience = {
-	Music = { Id = 1845682836, Volume = 0.22 },
+	-- Tracks rotate; the playlist darkens from night 3 on. (APM / licensed Creator Store music.)
+	Playlists = {
+		-- Long tracks (2.5-4.5 min each), shuffled, so the music rarely repeats within a shift.
+		Cute = { 133505549946221, 134630424395946, 101906137416418, 87683270918647, 1837523300 },
+		Eerie = { 96265108571854, 125295792074994, 128108081922306, 76853107615847, 140021816582186 },
+	},
+	QuietGap = { 6, 18 }, -- seconds of just the fridge hum between tracks
+	EerieFromNight = 3,
+	MusicVolume = 0.22,
+	CrossfadeTime = 3,
 	FridgeHum = { Id = 171186876, Volume = 0.25 },
+	Drone = { Id = 9112795583, Volume = 0.5 }, -- a low rumble that rises with Dread
+	Heartbeat = { Id = 9043365842, Volume = 0.6, Above = 0.65 }, -- heard above this much Dread
 	MusicSlowdownAtFullDread = 0.35, -- playback speed drops by this much at full Dread
 }
 
