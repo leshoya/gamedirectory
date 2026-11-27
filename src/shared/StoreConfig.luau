@@ -210,12 +210,35 @@ StoreConfig.Shift = {
 -- Dread fills from mistakes and drains slowly. Full Dread means a blackout.
 StoreConfig.Dread = {
 	Max = 100,
-	DrainPerSecond = 0.4, -- doubled by Brighter Lights
-	ServedAnomaly = 35,
-	TurnedAwayCustomer = 10,
-	CustomerLeft = 8, -- a real customer gave up waiting
-	PowerCutPerSecond = 1, -- while the lights are out on nights 4-5
-	AfterBlackout = 50, -- where Dread lands if the team resets the breaker in time
+	DrainPerSecond = 0.2, -- doubled by Brighter Lights
+	ServedAnomaly = 45,
+	TurnedAwayCustomer = 18,
+	CustomerLeft = 15, -- a real customer gave up waiting
+	AnomalyWaitingPerSecond = 1.2, -- while an anomaly stands at the counter, unanswered
+	PowerCutPerSecond = 2.5, -- while the lights are out on nights 4-5
+	CaughtByLingerer = 25, -- a lingering anomaly reached a worker
+	AfterBlackout = 60, -- where Dread lands if the team resets the breaker in time
+	FlickerAbove = 0.55, -- above this much Dread the store lights start to flicker
+}
+
+-- Served anomalies linger in the aisles, and creep closer whenever nobody is looking at them.
+StoreConfig.Creep = {
+	Every = 5, -- seconds between creeps
+	Step = 3.5, -- studs closer each time
+	LookingDot = 0.55, -- a worker facing within about 55 degrees of it counts as looking
+	CatchDistance = 4.5, -- this close and it gets you
+}
+
+-- Regulars: named customers with a story that moves forward each night (see Shared.Regulars).
+StoreConfig.Regulars = {
+	Chance = 0.65, -- chance a customer is a regular who hasn't visited yet tonight
+}
+
+-- Jumpscares. Plushes, stitches and a loud hit; no gore beyond what the anomalies already show.
+StoreConfig.Jumpscare = {
+	Sound = { Id = 9039981895, Volume = 0.9 },
+	SmallTime = 0.7, -- serving an anomaly
+	BigTime = 1.6, -- caught by a lingerer, or the blackout
 }
 
 -- Power cuts (nights 4-5) and the blackout.
