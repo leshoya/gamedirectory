@@ -78,11 +78,7 @@ StoreConfig.Products = {
 StoreConfig.Register = {
 	Position = Vector3.new(-14, 0, 6), -- counter center (Y is ignored; it sits on the floor)
 	CounterSize = Vector3.new(12, 3.5, 3.5),
-	PromptDistance = 7,
-	PromptKey = Enum.KeyCode.E,
-	ReleaseDistance = 12, -- walk this far from the register and you clock out
-	CheckInterval = 0.5, -- seconds between "did the worker walk away?" checks
-	IdleText = "OPEN",
+	IdleText = "OPEN 24H",
 }
 
 -- The pastel surfaces are close to white, so keep the light low or everything washes out.
