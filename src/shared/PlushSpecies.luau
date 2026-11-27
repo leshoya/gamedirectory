@@ -14,7 +14,8 @@ export type Species = {
 	Ears: "Long" | "Pointy" | "Round" | "Floppy" | "None",
 	EarsUseAccent: boolean?, -- whole ear in the accent color (puppy)
 	Tail: "Puff" | "Long" | "Nub" | "Wag" | "None",
-	Mouth: "Smile" | "Cat" | "Wide",
+	Mouth: "Smile" | "Cat" | "Wide" | "Teeth" | "Beak",
+	EyeColor: Color3?, -- defaults to PlushSpecies.EyeColor
 	Muzzle: boolean?, -- a rounded snout that holds the nose and mouth
 	Whiskers: boolean?,
 	EyePatch: boolean?, -- a colored patch around one eye
@@ -86,6 +87,32 @@ PlushSpecies.List = {
 		Tail = "None",
 		Mouth = "Wide",
 		EyeBumps = true,
+	},
+	-- Night 3 on: plushes that were never quite meant to be cute.
+	Wolf = {
+		DisplayName = "Wolf",
+		Colors = {
+			Body = Color3.fromRGB(150, 148, 168),
+			Belly = Color3.fromRGB(215, 210, 225),
+			Accent = Color3.fromRGB(120, 95, 150),
+		},
+		Ears = "Pointy",
+		Tail = "Long",
+		Mouth = "Teeth",
+		Muzzle = true,
+		EyeColor = Color3.fromRGB(235, 200, 60),
+	},
+	Crow = {
+		DisplayName = "Crow",
+		Colors = {
+			Body = Color3.fromRGB(62, 58, 82),
+			Belly = Color3.fromRGB(110, 102, 135),
+			Accent = Color3.fromRGB(150, 140, 170),
+		},
+		Ears = "None",
+		Tail = "None",
+		Mouth = "Beak",
+		EyeColor = Color3.fromRGB(230, 50, 70),
 	},
 } :: { [string]: Species }
 

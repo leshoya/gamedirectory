@@ -127,6 +127,21 @@ function Blackout.run(): boolean
 		survived = countdown(stalkers)
 	end
 
+	if not survived then
+		-- Too late. The closest plush in the dark gets everyone.
+		local closest, best = nil, math.huge
+		for _, model in stalkers do
+			local root = nearestPlayerRoot(model:GetPivot().Position)
+			local d = if root then (root.Position - model:GetPivot().Position).Magnitude else math.huge
+			if d < best then
+				closest, best = model, d
+			end
+		end
+		if closest then
+			Feedback.jumpscare(nil, closest, "Big")
+			task.wait(StoreConfig.Jumpscare.BigTime)
+		end
+	end
 	folder:Destroy()
 	if survived then
 		Dread.set(StoreConfig.Dread.AfterBlackout)

@@ -1,5 +1,5 @@
 --!strict
--- The register counter: counter, cash register with a screen, a stand spot and the prompt.
+-- The register counter: counter, cash register with a screen, and a mat where the worker stands.
 -- Customers come from the door side (+Z); the worker stands behind it (-Z).
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -12,7 +12,6 @@ local FLOOR_Y = StoreConfig.FloorY
 
 export type RegisterParts = {
 	Model: Model,
-	Prompt: ProximityPrompt,
 	Screen: TextLabel,
 	StandSpot: BasePart,
 }
@@ -67,24 +66,9 @@ function RegisterModel.build(parent: Instance): RegisterParts
 	)
 	standSpot.CanCollide = false
 
-	local attachment = Instance.new("Attachment")
-	attachment.Name = "PromptAttachment"
-	attachment.Position = Vector3.new(0, 0.2, -0.9) -- worker side of the machine
-	attachment.Parent = machine
-
-	local prompt = Instance.new("ProximityPrompt")
-	prompt.ObjectText = "Register"
-	prompt.ActionText = "Clock in"
-	prompt.KeyboardKeyCode = cfg.PromptKey
-	prompt.MaxActivationDistance = cfg.PromptDistance
-	prompt.HoldDuration = 0
-	prompt.RequiresLineOfSight = false
-	prompt.Parent = attachment
-
 	model.PrimaryPart = counter
 	return {
 		Model = model,
-		Prompt = prompt,
 		Screen = screen,
 		StandSpot = standSpot,
 	}

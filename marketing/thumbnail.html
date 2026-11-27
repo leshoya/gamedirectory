@@ -1,0 +1,109 @@
+﻿<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; }
+  body {
+    font-family: "Segoe UI Black", "Segoe UI", sans-serif;
+    background: radial-gradient(ellipse at 70% 110%, #ff8fc8 0%, #7a4bb8 30%, #2b1f5c 62%, #120d2b 100%);
+    position: relative;
+  }
+  .stars span { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: #fff; opacity: .8; box-shadow: 0 0 8px #fff; }
+  .moon { position: absolute; left: 150px; top: 90px; width: 150px; height: 150px; border-radius: 50%;
+    background: #fff4fb; box-shadow: 0 0 60px 20px rgba(255, 220, 245, .45); }
+  .moon::after { content: ""; position: absolute; left: 40px; top: -10px; width: 150px; height: 150px; border-radius: 50%; background: #1d1545; }
+
+  /* The store */
+  .store { position: absolute; right: 120px; bottom: 120px; width: 1040px; height: 640px; }
+  .wall { position: absolute; inset: 120px 0 0 0; background: linear-gradient(#cdf5e4, #b6e9d4); border-radius: 18px;
+    box-shadow: 0 30px 80px rgba(0,0,0,.45); }
+  .sign { position: absolute; left: 50%; top: 0; transform: translateX(-50%); padding: 18px 54px; border-radius: 22px;
+    background: #ff78c8; color: #fff; font-size: 58px; letter-spacing: 4px; white-space: nowrap;
+    box-shadow: 0 0 40px 10px rgba(255, 120, 200, .8), inset 0 0 18px rgba(255,255,255,.6);
+    text-shadow: 0 0 14px #fff; }
+  .awning { position: absolute; left: -20px; right: -20px; top: 150px; height: 70px; border-radius: 0 0 26px 26px;
+    background: repeating-linear-gradient(90deg, #ff78c8 0 60px, #fff 60px 120px);
+    box-shadow: 0 12px 20px rgba(0,0,0,.25); }
+  .window { position: absolute; top: 250px; bottom: 40px; border-radius: 14px; overflow: hidden;
+    background: linear-gradient(#fff3fa, #ffd9ec); border: 12px solid #d6c4ff;
+    box-shadow: inset 0 0 60px rgba(255, 200, 235, .9), 0 0 50px rgba(255, 210, 240, .7); }
+  .w1 { left: 40px; width: 560px; }
+  .w2 { right: 40px; width: 300px; }
+  .shelf { position: absolute; left: 0; right: 0; height: 14px; background: #f0d2b6; }
+  .goods { position: absolute; left: 20px; right: 20px; display: flex; gap: 12px; }
+  .goods i { display: block; width: 34px; border-radius: 6px; }
+  .door { position: absolute; left: 640px; width: 0; }
+  .bunny { position: absolute; bottom: 30px; }
+  .bunny svg { width: 100%; height: 100%; display: block; }
+  .help { position: absolute; right: 70px; top: 300px; width: 200px; padding: 14px; border-radius: 10px; background: #fffaf2;
+    transform: rotate(4deg); text-align: center; box-shadow: 0 6px 16px rgba(0,0,0,.25); }
+  .help b { display: block; color: #e64678; font-size: 34px; line-height: 1; }
+  .help span { display: block; color: #78509f; font-size: 20px; margin-top: 8px; font-family: "Segoe UI", sans-serif; font-weight: 700; }
+
+  /* Title */
+  .title { position: absolute; left: 90px; top: 300px; width: 760px; color: #fff; line-height: .92; }
+  .title .small { font-size: 54px; letter-spacing: 10px; color: #ffd6ee; text-shadow: 0 0 20px #ff78c8; }
+  .title .big { font-size: 150px; letter-spacing: 2px;
+    text-shadow: 0 0 6px #fff, 0 0 30px #ff78c8, 0 0 70px #ff78c8, 6px 8px 0 #6a3aa8; }
+  .tag { position: absolute; left: 96px; top: 700px; width: 560px; line-height: 1.2; font-family: "Segoe UI", sans-serif; font-weight: 800; font-size: 40px; color: #fff;
+    background: rgba(40, 20, 70, .55); padding: 14px 28px; border-radius: 40px; border: 3px solid #ff9fd4; }
+  .tag em { color: #ffb3dc; font-style: normal; }
+  .night { position: absolute; left: 100px; top: 880px; font-size: 34px; letter-spacing: 12px; color: #c9b6ff; }
+</style>
+</head>
+<body>
+  <div class="stars" id="stars"></div>
+  <div class="moon"></div>
+
+  <div class="store">
+    <div class="wall"></div>
+    <div class="sign">PLUSHIE MART</div>
+    <div class="awning"></div>
+    <div class="window w1" id="w1">
+      <div class="shelf" style="top: 120px"></div>
+      <div class="goods" id="g1" style="top: 70px"></div>
+    </div>
+    <div class="window w2" id="w2"></div>
+    <div class="help"><b>HELP WANTED</b><span>Night shift<br>Must love plushies</span></div>
+  </div>
+
+  <div class="title">
+    <div class="small">MIDNIGHT</div>
+    <div class="big">PLUSHIE<br>MART</div>
+  </div>
+  <div class="tag">Serve the cute ones.<br><em>Spot the wrong ones.</em></div>
+  <div class="night">NIGHT SHIFT</div>
+
+  <script src="bunny.js"></script>
+  <script>
+    const stars = document.getElementById("stars");
+    for (let i = 0; i < 70; i++) {
+      const s = document.createElement("span");
+      s.style.left = (Math.sin(i * 12.9898) * 43758.5453 % 1 + 1) % 1 * 1920 + "px";
+      s.style.top = (Math.sin(i * 78.233) * 12345.678 % 1 + 1) % 1 * 520 + "px";
+      s.style.transform = `scale(${0.5 + (i % 4) * 0.4})`;
+      stars.appendChild(s);
+    }
+    const pastels = ["#ffa0cd", "#a0e1ff", "#ffe18c", "#afebbe", "#d2b4ff"];
+    const g1 = document.getElementById("g1");
+    for (let i = 0; i < 13; i++) {
+      const it = document.createElement("i");
+      it.style.background = pastels[i % 5];
+      it.style.height = (36 + (i * 7) % 18) + "px";
+      it.style.marginTop = (50 - (36 + (i * 7) % 18)) + "px";
+      g1.appendChild(it);
+    }
+    // The cute customer and the wrong one, side by side in the big window
+    const w1 = document.getElementById("w1");
+    const cute = document.createElement("div");
+    cute.className = "bunny"; cute.style.left = "40px"; cute.style.width = "220px"; cute.style.height = "330px";
+    cute.innerHTML = bunny({});
+    const wrong = document.createElement("div");
+    wrong.className = "bunny"; wrong.style.left = "290px"; wrong.style.width = "230px"; wrong.style.height = "345px";
+    wrong.innerHTML = bunny({ body: "#b8b2be", inner: "#9c96a4", belly: "#d6d2da", wrong: true });
+    w1.append(cute, wrong);
+  </script>
+</body>
+</html>
+

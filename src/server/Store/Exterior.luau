@@ -86,6 +86,33 @@ function Exterior.build(parent: Instance)
 	glow.Brightness = 1.2
 	glow.Parent = sign
 
+	-- A HELP WANTED sign taped to the window beside the door (the opening cutscene looks at it).
+	local help = PartFactory.part({
+		Name = "HelpWanted",
+		Size = Vector3.new(3.2, 2.2, 0.05),
+		CFrame = CFrame.new(-7.5, FLOOR_Y + 4.6, frontEdge + 0.03),
+		Color = Color3.fromRGB(255, 250, 240),
+		CanCollide = false,
+		Parent = outside,
+	})
+	local helpGui = Instance.new("SurfaceGui")
+	helpGui.Face = Enum.NormalId.Back -- +Z, out to the street
+	helpGui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+	helpGui.PixelsPerStud = 50
+	helpGui.LightInfluence = 0.4
+	helpGui.Parent = help
+	for i, line in { "HELP WANTED", "Night shift", "Must love plushies" } do
+		local text = Instance.new("TextLabel")
+		text.Size = UDim2.fromScale(0.9, if i == 1 then 0.4 else 0.22)
+		text.Position = UDim2.fromScale(0.05, if i == 1 then 0.06 else 0.26 + i * 0.2)
+		text.BackgroundTransparency = 1
+		text.Font = Enum.Font.FredokaOne
+		text.TextScaled = true
+		text.TextColor3 = if i == 1 then Color3.fromRGB(230, 70, 120) else C.SignText
+		text.Text = line
+		text.Parent = helpGui
+	end
+
 	local mat = PartFactory.box(outside, "DoorMat", Vector3.new(6, 0.05, 3), Vector3.new(0, FLOOR_Y, S.Depth / 2 - 2), C.Trim)
 	mat.CanCollide = false
 

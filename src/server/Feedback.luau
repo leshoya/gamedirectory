@@ -33,6 +33,17 @@ function Feedback.popup(text: string, position: Vector3, color: Color3)
 	remote:FireAllClients({ Kind = "Popup", Text = text, Position = position, Color = color })
 end
 
+-- A jumpscare with this plush's face: "Small" (serving an anomaly) or "Big" (caught).
+-- Goes to one player, or everyone if `player` is nil.
+function Feedback.jumpscare(player: Player?, model: Model, size: "Small" | "Big")
+	local message = { Kind = "Jumpscare", Model = model, Size = size }
+	if player then
+		remote:FireClient(player, message)
+	else
+		remote:FireAllClients(message)
+	end
+end
+
 -- A particle burst: "Hearts" or "Sparkles".
 function Feedback.burst(style: string, position: Vector3)
 	remote:FireAllClients({ Kind = "Burst", Style = style, Position = position })

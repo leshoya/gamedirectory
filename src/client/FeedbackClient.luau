@@ -5,6 +5,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Sounds = require(script.Parent.Sounds)
 local Popups = require(script.Parent.Popups)
 local Bursts = require(script.Parent.Bursts)
+local Jumpscare = require(script.Parent.Jumpscare)
 
 type Message = {
 	Kind: string,
@@ -14,6 +15,8 @@ type Message = {
 	Position: Vector3?,
 	Color: Color3?,
 	Speed: number?,
+	Model: Model?,
+	Size: ("Small" | "Big")?,
 }
 
 local FeedbackClient = {}
@@ -25,6 +28,8 @@ local function handle(message: Message)
 		Popups.show(message.Text, message.Position, message.Color or Color3.new(1, 1, 1))
 	elseif message.Kind == "Burst" and message.Style and message.Position then
 		Bursts.play(message.Style, message.Position)
+	elseif message.Kind == "Jumpscare" then
+		task.spawn(Jumpscare.play, message.Model, message.Size or "Small")
 	end
 end
 

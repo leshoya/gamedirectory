@@ -25,6 +25,7 @@ StoreConfig.Layout = {
 	RamenX = 2,
 	StaffDoorX = 20,
 	ManagerSpot = Vector3.new(20, 0, -15.5), -- Manager Mochi stands in front of the staff door
+	ManagerCamera = Vector3.new(13.5, 7.5, -6), -- intro close-up: from the aisle, looking past the shelf end
 	WindowBar = { FromX = -25, ToX = -7 }, -- a counter with stools along the front window
 	CeilingLights = { X = { -21, -7, 7, 21 }, Z = { -12, -1, 10 } },
 	StringLightSpacing = 2.5,
@@ -77,11 +78,7 @@ StoreConfig.Products = {
 StoreConfig.Register = {
 	Position = Vector3.new(-14, 0, 6), -- counter center (Y is ignored; it sits on the floor)
 	CounterSize = Vector3.new(12, 3.5, 3.5),
-	PromptDistance = 7,
-	PromptKey = Enum.KeyCode.E,
-	ReleaseDistance = 12, -- walk this far from the register and you clock out
-	CheckInterval = 0.5, -- seconds between "did the worker walk away?" checks
-	IdleText = "OPEN",
+	IdleText = "OPEN 24H",
 }
 
 -- The pastel surfaces are close to white, so keep the light low or everything washes out.
@@ -92,15 +89,28 @@ StoreConfig.Lighting = {
 	CeilingLightRange = 20,
 }
 
-export type Item = { DisplayName: string, CupColor: Color3, Style: "Cup" | "Bowl" }
+export type Item = { DisplayName: string, CupColor: Color3, Style: "Cup" | "Bowl", Making: ("Shake" | "Whisk")? }
 export type Sound = { Id: number, Volume: number, Speed: number? }
 
--- Things a worker can carry and a customer can order.
+-- Things a worker can carry and a customer can order. Drinks with Making are made in a minigame.
 StoreConfig.Items = {
-	BubbleTea = {
-		DisplayName = "bubble tea",
-		CupColor = Color3.fromRGB(230, 200, 170), -- milk tea
+	MilkTea = {
+		DisplayName = "milk tea",
+		CupColor = Color3.fromRGB(230, 200, 170),
 		Style = "Cup",
+		Making = "Shake",
+	},
+	TaroTea = {
+		DisplayName = "taro milk tea",
+		CupColor = Color3.fromRGB(200, 170, 240),
+		Style = "Cup",
+		Making = "Shake",
+	},
+	Matcha = {
+		DisplayName = "matcha latte",
+		CupColor = Color3.fromRGB(170, 215, 140),
+		Style = "Cup",
+		Making = "Whisk",
 	},
 	Ramen = {
 		DisplayName = "hot ramen",
@@ -109,11 +119,18 @@ StoreConfig.Items = {
 	},
 } :: { [string]: Item }
 
--- Stations where workers make items. MakeTime is how long to hold E (halved by the Turbo Shaker).
-StoreConfig.BubbleTea = {
+-- Drink minigames at the bubble tea bar. Finish faster for a better drink and bigger tips.
+StoreConfig.Drinks = {
 	PromptDistance = 6,
-	MakeTime = 1,
+	Shake = { Target = 24, TimeLimit = 7, PerfectTime = 3.5, GoodTime = 5 }, -- alternating A/D presses
+	Whisk = { Target = 6, TimeLimit = 9, PerfectTime = 4.5, GoodTime = 6.5 }, -- full circles
+	SpillBelow = 0.5, -- out of time below this much progress: the drink spills
+	TurboEffort = 0.7, -- the Turbo Shaker upgrade cuts the work to 70%
+	MinTime = 1.2, -- the server ignores drinks "made" faster than this
+	QualityTips = { Perfect = 1.5, Good = 1.2, Okay = 1 },
 }
+
+-- Hold-to-make stations. MakeTime is how long to hold E (halved by the Turbo Shaker).
 StoreConfig.Ramen = {
 	PromptDistance = 6,
 	MakeTime = 2,
@@ -129,9 +146,10 @@ StoreConfig.Customers = {
 	HopHeight = 0.35,
 	HopRate = 9, -- hops per second while walking
 	Patience = 35, -- seconds a customer waits before giving up (+25% with Comfy Mats)
+	HelloTime = 2.2, -- seconds a hello stays up before they order
 	ReplyTime = 2, -- seconds a reply bubble ("Thank you!") stays up before they leave
 	LeaveSlowSpeed = 2.5, -- turned-away anomalies leave slowly, still smiling
-	Menu = { "BubbleTea", "Ramen" }, -- what normal customers order
+	Menu = { "MilkTea", "TaroTea", "Matcha", "Ramen" }, -- what normal customers order
 	Payments = { "coins", "a card", "exact change", "shiny coins" }, -- what normal customers pay with
 	-- Served anomalies don't leave: they stand in an aisle, watching, until the night ends.
 	-- They walk along the front of the aisles at LingerEntryZ, then straight down to their spot.
@@ -173,9 +191,9 @@ StoreConfig.Tips = {
 StoreConfig.Nights = {
 	{ Customers = 6, AnomalyChance = 0 },
 	{ Customers = 8, AnomalyChance = 0.2 },
-	{ Customers = 10, AnomalyChance = 0.3 },
-	{ Customers = 12, AnomalyChance = 0.4, PowerCuts = true },
-	{ Customers = 14, AnomalyChance = 0.5, PowerCuts = true },
+	{ Customers = 10, AnomalyChance = 0.35, ExtraSpecies = { "Wolf", "Crow" } },
+	{ Customers = 12, AnomalyChance = 0.45, PowerCuts = true, ExtraSpecies = { "Wolf", "Crow" } },
+	{ Customers = 14, AnomalyChance = 0.55, PowerCuts = true, ExtraSpecies = { "Wolf", "Crow" } },
 }
 
 StoreConfig.Shift = {
@@ -187,17 +205,41 @@ StoreConfig.Shift = {
 	CustomerGap = 2, -- seconds between one customer leaving and the next arriving
 	ExtraCustomersPerPlayer = 1, -- more players, a little busier
 	ExtraAnomalyPerPlayer = 0.03,
+	OnboardingWait = 150, -- seconds the first night waits for new workers to finish the intro
 }
 
 -- Dread fills from mistakes and drains slowly. Full Dread means a blackout.
 StoreConfig.Dread = {
 	Max = 100,
-	DrainPerSecond = 0.4, -- doubled by Brighter Lights
-	ServedAnomaly = 35,
-	TurnedAwayCustomer = 10,
-	CustomerLeft = 8, -- a real customer gave up waiting
-	PowerCutPerSecond = 1, -- while the lights are out on nights 4-5
-	AfterBlackout = 50, -- where Dread lands if the team resets the breaker in time
+	DrainPerSecond = 0.2, -- doubled by Brighter Lights
+	ServedAnomaly = 45,
+	TurnedAwayCustomer = 18,
+	CustomerLeft = 15, -- a real customer gave up waiting
+	AnomalyWaitingPerSecond = 1.2, -- while an anomaly stands at the counter, unanswered
+	PowerCutPerSecond = 2.5, -- while the lights are out on nights 4-5
+	CaughtByLingerer = 25, -- a lingering anomaly reached a worker
+	AfterBlackout = 60, -- where Dread lands if the team resets the breaker in time
+	FlickerAbove = 0.55, -- above this much Dread the store lights start to flicker
+}
+
+-- Served anomalies linger in the aisles, and creep closer whenever nobody is looking at them.
+StoreConfig.Creep = {
+	Every = 5, -- seconds between creeps
+	Step = 3.5, -- studs closer each time
+	LookingDot = 0.55, -- a worker facing within about 55 degrees of it counts as looking
+	CatchDistance = 4.5, -- this close and it gets you
+}
+
+-- Regulars: named customers with a story that moves forward each night (see Shared.Regulars).
+StoreConfig.Regulars = {
+	Chance = 0.65, -- chance a customer is a regular who hasn't visited yet tonight
+}
+
+-- Jumpscares. Plushes, stitches and a loud hit; no gore beyond what the anomalies already show.
+StoreConfig.Jumpscare = {
+	Sound = { Id = 9039981895, Volume = 0.9 },
+	SmallTime = 0.7, -- serving an anomaly
+	BigTime = 1.6, -- caught by a lingerer, or the blackout
 }
 
 -- Power cuts (nights 4-5) and the blackout.
@@ -251,8 +293,19 @@ StoreConfig.Sounds = {
 -- Background sound in the store. The music box slows and drops in pitch as Dread rises,
 -- and goes quiet when the power is out. (APM music and a loopable hum, both free on the Creator Store.)
 StoreConfig.Ambience = {
-	Music = { Id = 1845682836, Volume = 0.22 },
+	-- Tracks rotate; the playlist darkens from night 3 on. (APM / licensed Creator Store music.)
+	Playlists = {
+		-- Long tracks (2.5-4.5 min each), shuffled, so the music rarely repeats within a shift.
+		Cute = { 133505549946221, 134630424395946, 101906137416418, 87683270918647, 1837523300 },
+		Eerie = { 96265108571854, 125295792074994, 128108081922306, 76853107615847, 140021816582186 },
+	},
+	QuietGap = { 6, 18 }, -- seconds of just the fridge hum between tracks
+	EerieFromNight = 3,
+	MusicVolume = 0.22,
+	CrossfadeTime = 3,
 	FridgeHum = { Id = 171186876, Volume = 0.25 },
+	Drone = { Id = 9112795583, Volume = 0.5 }, -- a low rumble that rises with Dread
+	Heartbeat = { Id = 9043365842, Volume = 0.6, Above = 0.65 }, -- heard above this much Dread
 	MusicSlowdownAtFullDread = 0.35, -- playback speed drops by this much at full Dread
 }
 

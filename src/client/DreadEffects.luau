@@ -1,6 +1,6 @@
 --!strict
--- As Dread rises the pastel store drains toward grey, and past halfway the neon sign
--- now and then flickers to a different word.
+-- As Dread rises the pastel store drains toward grey, past halfway the neon sign now and then
+-- flickers to a different word, and past FlickerAbove the lights stutter dark for a moment.
 
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -23,6 +23,8 @@ end
 function DreadEffects.init()
 	local correction = Lighting:WaitForChild("DreadCorrection", 30) :: ColorCorrectionEffect?
 	local shown = 0
+	local dimUntil = 0
+	local flickerRng = Random.new()
 
 	RunService.RenderStepped:Connect(function(dt)
 		local target = ((ReplicatedStorage:GetAttribute("Dread") or 0) :: number) / StoreConfig.Dread.Max
@@ -31,6 +33,12 @@ function DreadEffects.init()
 			correction.Saturation = 0.1 + (-0.9 - 0.1) * shown
 			correction.Contrast = 0.2 * shown
 			correction.TintColor = CALM_TINT:Lerp(DREAD_TINT, shown)
+			-- Lights stutter more often the higher Dread climbs.
+			local above = (shown - StoreConfig.Dread.FlickerAbove) / (1 - StoreConfig.Dread.FlickerAbove)
+			if above > 0 and os.clock() > dimUntil and flickerRng:NextNumber() < above * dt * 0.6 then
+				dimUntil = os.clock() + flickerRng:NextNumber(0.05, 0.25)
+			end
+			correction.Brightness = if os.clock() < dimUntil then -0.45 else 0
 		end
 	end)
 

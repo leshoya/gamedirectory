@@ -8,6 +8,7 @@ local StoreConfig = require(ReplicatedStorage.Shared.StoreConfig)
 local PartFactory = require(script.Parent.Parent.Store.PartFactory)
 
 local ATTRIBUTE = "Holding"
+local QUALITY_ATTRIBUTE = "HoldingQuality"
 local MODEL_NAME = "HeldItem"
 
 local HeldItem = {}
@@ -104,8 +105,13 @@ function HeldItem.get(player: Player): string?
 	return player:GetAttribute(ATTRIBUTE) :: string?
 end
 
+-- How well the held drink was made ("Perfect", "Good" or "Okay"), if it came from a minigame.
+function HeldItem.quality(player: Player): string?
+	return player:GetAttribute(QUALITY_ATTRIBUTE) :: string?
+end
+
 -- Puts an item in the player's hand. Fails if their hands are full or they have no character.
-function HeldItem.give(player: Player, itemName: string): boolean
+function HeldItem.give(player: Player, itemName: string, quality: string?): boolean
 	local item = StoreConfig.Items[itemName]
 	local character = player.Character
 	local hand = character and findHand(character)
@@ -115,6 +121,7 @@ function HeldItem.give(player: Player, itemName: string): boolean
 	local model = if item.Style == "Bowl" then buildBowl(hand, item.CupColor) else buildCup(hand, item.CupColor)
 	model.Parent = character
 	player:SetAttribute(ATTRIBUTE, itemName)
+	player:SetAttribute(QUALITY_ATTRIBUTE, quality)
 	return true
 end
 
@@ -127,6 +134,7 @@ function HeldItem.take(player: Player): string?
 		model:Destroy()
 	end
 	player:SetAttribute(ATTRIBUTE, nil)
+	player:SetAttribute(QUALITY_ATTRIBUTE, nil)
 	return itemName
 end
 
@@ -135,6 +143,7 @@ function HeldItem.init()
 	local function watch(player: Player)
 		player.CharacterAdded:Connect(function()
 			player:SetAttribute(ATTRIBUTE, nil)
+			player:SetAttribute(QUALITY_ATTRIBUTE, nil)
 		end)
 	end
 	Players.PlayerAdded:Connect(watch)

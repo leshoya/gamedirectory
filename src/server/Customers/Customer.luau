@@ -7,6 +7,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StoreConfig = require(ReplicatedStorage.Shared.StoreConfig)
 local PlushSpecies = require(ReplicatedStorage.Shared.PlushSpecies)
 local Anomalies = require(ReplicatedStorage.Shared.Anomalies)
+local Regulars = require(ReplicatedStorage.Shared.Regulars)
 local PlushRig = require(script.Parent.Parent.Plush.PlushRig)
 local Accessories = require(script.Parent.Parent.Plush.Accessories)
 local Blink = require(script.Parent.Parent.Plush.Blink)
@@ -16,12 +17,16 @@ local HeldItem = require(script.Parent.Parent.Items.HeldItem)
 local Upgrades = require(script.Parent.Parent.Economy.Upgrades)
 local Feedback = require(script.Parent.Parent.Feedback)
 local Outcomes = require(script.Parent.Parent.Shift.Outcomes)
+local Dread = require(script.Parent.Parent.Shift.Dread)
+local Lingerer = require(script.Parent.Lingerer)
 
 export type Context = {
 	Night: number,
 	AnomalyChance: number,
 	IsOpen: () -> boolean, -- false once the night's service is over
 	Linger: Folder, -- where served anomalies wait out the night
+	Visited: { [string]: boolean }, -- regulars who already came in tonight
+	ExtraSpecies: { string }?, -- species that only show up on later nights
 }
 
 local PATIENCE_TICK = 0.2
@@ -34,20 +39,61 @@ local function pick<T>(list: { T }): T
 	return list[rng:NextInteger(1, #list)]
 end
 
-local function makePlush(anomaly: Anomalies.Anomaly?): (PlushRig.Plush, boolean)
+-- Regulars always look the same (species and accessory), so players learn to recognize them.
+local function makePlush(anomaly: Anomalies.Anomaly?, regular: Regulars.Regular?, ctx: Context): (PlushRig.Plush, boolean)
 	local cfg = StoreConfig.Customers
-	local sparkle = anomaly == nil and rng:NextNumber() < cfg.SparkleChance
+	local sparkle = anomaly == nil and regular == nil and rng:NextNumber() < cfg.SparkleChance
 	local options: PlushRig.Options = {
 		Sparkle = sparkle,
 		Accessory = if rng:NextNumber() < cfg.AccessoryChance then pick(Accessories.Kinds) else nil,
 		AccessoryColor = pick(PlushSpecies.AccessoryColors),
 	}
+	local species = pick(cfg.SpeciesPool)
+	if regular then
+		species = regular.Species
+		options.Accessory = regular.Accessory
+		options.AccessoryColor = regular.AccessoryColor
+	elseif ctx.ExtraSpecies and rng:NextNumber() < 0.4 then
+		species = pick(ctx.ExtraSpecies)
+	end
 	if anomaly and anomaly.Look then
 		for key, on in anomaly.Look do
 			(options :: any)[key] = on
 		end
 	end
-	return PlushRig.build(pick(cfg.SpeciesPool), options, rng), sparkle
+	return PlushRig.build(species, options, rng), sparkle
+end
+
+-- Picks who walks in: a regular who hasn't visited tonight, or a stranger. A "Doesn't Remember"
+-- anomaly is always a copy of a regular, even one who already came in.
+local function pickRegular(anomaly: Anomalies.Anomaly?, ctx: Context): Regulars.Regular?
+	if anomaly and anomaly.Forgets then
+		return pick(Regulars.List)
+	end
+	if rng:NextNumber() >= StoreConfig.Regulars.Chance then
+		return nil
+	end
+	local fresh = {}
+	for _, regular in Regulars.List do
+		if not ctx.Visited[regular.Id] then
+			table.insert(fresh, regular)
+		end
+	end
+	if #fresh == 0 then
+		return nil
+	end
+	local regular = pick(fresh)
+	ctx.Visited[regular.Id] = true
+	return regular
+end
+
+local function linesFor(regular: Regulars.Regular?, anomaly: Anomalies.Anomaly?, night: number): Regulars.Lines
+	if regular and anomaly and anomaly.Forgets then
+		return pick(regular.Wrong)
+	elseif regular then
+		return regular.Nights[math.clamp(night, 1, #regular.Nights)]
+	end
+	return pick(Regulars.Strangers)
 end
 
 -- `offset` shifts the prompt sideways on screen so Serve and Turn away sit side by side.
@@ -81,7 +127,9 @@ function Customer.run(parent: Instance, ctx: Context)
 		end
 	end
 
-	local plush, sparkle = makePlush(anomaly)
+	local regular = pickRegular(anomaly, ctx)
+	local lines = linesFor(regular, anomaly, ctx.Night)
+	local plush, sparkle = makePlush(anomaly, regular, ctx)
 	local model, head, body = plush.Model, plush.Head, plush.Body
 	local voice = if anomaly and anomaly.VoiceSpeed then anomaly.VoiceSpeed else 1
 
@@ -90,7 +138,7 @@ function Customer.run(parent: Instance, ctx: Context)
 	if not (anomaly and anomaly.NeverBlinks) then
 		Blink.start(model, plush.Eyes, rng)
 	end
-	local bubble = SpeechBubble.create(head)
+	local bubble = SpeechBubble.create(head, regular and regular.Name)
 
 	-- Arrive
 	Feedback.sound("DoorChime", cfg.DoorPosition)
@@ -100,12 +148,17 @@ function Customer.run(parent: Instance, ctx: Context)
 	CustomerMover.walkPath(model, { cfg.DoorPosition, cfg.OrderSpot })
 	CustomerMover.face(model, cfg.OrderSpot + Vector3.new(0, 0, -1)) -- face the register
 
-	-- Order: what they want, and how they'll pay
+	-- Say hello, then order: what they want, and how they'll pay
+	bubble.say(lines.Hello)
+	Feedback.sound("Squeak", head.Position, voice)
+	task.wait(cfg.HelloTime)
 	local order: string? = if anomaly and anomaly.Request then nil else pick(cfg.Menu)
-	local request = if order then "One " .. StoreConfig.Items[order].DisplayName .. ", please!" else "Do you have " .. pick((anomaly :: any).Request) .. "?"
+	local request = if order
+		then (string.gsub(lines.Order, "{item}", StoreConfig.Items[order].DisplayName))
+		else "Do you have " .. pick((anomaly :: any).Request) .. "?"
+	request = string.upper(string.sub(request, 1, 1)) .. string.sub(request, 2) -- "{item}. Now." starts a sentence
 	local payment = if anomaly and anomaly.Payment then pick(anomaly.Payment) else pick(cfg.Payments)
 	bubble.say(request .. "\nI'll pay with " .. payment .. ".")
-	Feedback.sound("Squeak", head.Position, voice)
 
 	local resolved = false
 	if anomaly and anomaly.NeverBlinks then
@@ -119,6 +172,7 @@ function Customer.run(parent: Instance, ctx: Context)
 	local turnAway = addPrompt(body, "Something's wrong?", "Sorry, we're closed", Enum.KeyCode.F, Enum.KeyCode.ButtonY, 110)
 	local kind: "Served" | "TurnedAway" | "Left" | "Closed" = "Left"
 	local by: Player? = nil
+	local quality: string? = nil
 
 	local serveConnection = serve.Triggered:Connect(function(player: Player)
 		if by then
@@ -127,6 +181,7 @@ function Customer.run(parent: Instance, ctx: Context)
 		local holding = HeldItem.get(player)
 		-- Anomalies take whatever they're handed; real customers want what they ordered.
 		if holding and (anomaly or holding == order) then
+			quality = HeldItem.quality(player)
 			HeldItem.take(player)
 			kind, by = "Served", player
 		else
@@ -146,6 +201,10 @@ function Customer.run(parent: Instance, ctx: Context)
 	while not by and os.clock() - started < patience and ctx.IsOpen() do
 		bubble.setPatience(1 - (os.clock() - started) / patience)
 		task.wait(PATIENCE_TICK)
+		if anomaly then
+			-- Something wrong standing at the counter makes the whole store feel worse.
+			Dread.add(StoreConfig.Dread.AnomalyWaitingPerSecond * PATIENCE_TICK)
+		end
 	end
 	if not by and not ctx.IsOpen() then
 		kind = "Closed"
@@ -163,24 +222,24 @@ function Customer.run(parent: Instance, ctx: Context)
 		Anomaly = anomaly and anomaly.Id,
 		Waited = os.clock() - started,
 		Sparkle = sparkle,
+		Quality = quality,
 		Position = head.Position,
 	})
 
 	-- React and leave
 	local exit = { cfg.DoorPosition, cfg.SpawnPosition }
 	if kind == "Served" and anomaly then
-		bubble.say("Thank you. I think I'll stay.")
+		bubble.say(if regular then lines.Thanks else "Thank you. I think I'll stay.")
+		Feedback.jumpscare(by, model, "Small")
 		task.wait(cfg.ReplyTime)
 		bubble.hide()
 		model.Parent = ctx.Linger
 		local spot = freeLingerSpot(ctx.Linger)
 		CustomerMover.walkPath(model, { Vector3.new(spot.X, 0, cfg.LingerEntryZ), spot }, cfg.LeaveSlowSpeed)
-		CustomerMover.stare(model, function()
-			return false
-		end)
+		Lingerer.start(model) -- it creeps closer whenever nobody is looking
 		return -- it stays until the night ends
 	elseif kind == "Served" then
-		bubble.say(if sparkle then "Sparkly thanks!" else "Thank you!")
+		bubble.say(if regular then lines.Thanks elseif sparkle then "Sparkly thanks!" else "Thank you!")
 		Feedback.sound("Register", body.Position)
 		Feedback.burst("Hearts", head.Position)
 		if sparkle then

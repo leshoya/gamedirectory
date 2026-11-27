@@ -14,7 +14,7 @@ local StoreLighting = require(script.Parent.StoreLighting)
 export type Store = {
 	Model: Model,
 	Register: RegisterModel.RegisterParts,
-	Shaker: BasePart,
+	DrinkSpots: { [string]: BasePart },
 	HotWater: BasePart,
 	Breaker: BasePart,
 	Lights: { Instance }, -- everything that goes dark in a power cut
@@ -60,7 +60,7 @@ function StoreBuilder.build(): Store
 	return {
 		Model = store,
 		Register = register,
-		Shaker = fixtures.Shaker,
+		DrinkSpots = fixtures.DrinkSpots,
 		HotWater = fixtures.HotWater,
 		Breaker = fixtures.Breaker,
 		Lights = {
