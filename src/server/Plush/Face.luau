@@ -19,8 +19,8 @@ local Face = {}
 
 local WHITE = Color3.new(1, 1, 1)
 
-local function button(model: Model, at: CFrame, eyes: Eyes)
-	local eye = Shapes.blob(model, "Eye", Vector3.new(0.42, 0.48, 0.2), at, PlushSpecies.EyeColor, Enum.Material.SmoothPlastic)
+local function button(model: Model, at: CFrame, eyes: Eyes, color: Color3)
+	local eye = Shapes.blob(model, "Eye", Vector3.new(0.42, 0.48, 0.2), at, color, Enum.Material.SmoothPlastic)
 	eye.Reflectance = 0.1
 	local shine = Shapes.blob(model, "EyeShine", Vector3.new(0.13, 0.13, 0.08), at * CFrame.new(-0.08, 0.11, -0.09), WHITE, Enum.Material.SmoothPlastic)
 	table.insert(eyes.Eyes, eye)
@@ -57,6 +57,7 @@ end
 function Face.build(model: Model, head: Shapes.Oval, species: PlushSpecies.Species, colors: PlushSpecies.Palette, options: Options): Eyes
 	local eyes: Eyes = { Eyes = {}, Shines = {} }
 	local thread = Shapes.shade(colors.Body, 0.75)
+	local eyeColor = species.EyeColor or PlushSpecies.EyeColor
 
 	-- Eye patch goes on first so the eye sits on top of it.
 	if species.EyePatch then
@@ -69,11 +70,11 @@ function Face.build(model: Model, head: Shapes.Oval, species: PlushSpecies.Speci
 			-- Upright, so the eye on its front faces forward rather than up.
 			local spot = Shapes.onSurface(head, Vector3.new(side * 0.5, 1, -0.35), -0.2).Position
 			local bump = Shapes.blob(model, "EyeBump", Vector3.new(0.9, 0.85, 0.85), CFrame.new(spot), colors.Body)
-			button(model, Shapes.onSurface(Shapes.of(bump), Vector3.new(0, 0.05, -1), -0.04), eyes)
+			button(model, Shapes.onSurface(Shapes.of(bump), Vector3.new(0, 0.05, -1), -0.04), eyes, eyeColor)
 		end
 	else
 		for side = -1, 1, 2 do
-			button(model, Shapes.onSurface(head, Vector3.new(side * 0.42, 0.15, -1), -0.04), eyes)
+			button(model, Shapes.onSurface(head, Vector3.new(side * 0.42, 0.15, -1), -0.04), eyes, eyeColor)
 		end
 	end
 
@@ -93,7 +94,25 @@ function Face.build(model: Model, head: Shapes.Oval, species: PlushSpecies.Speci
 		noseY, mouthY = 0.22, -0.12
 		noseColor = PlushSpecies.EyeColor
 	end
+	if species.Mouth == "Beak" then
+		-- A long felt beak instead of a nose and mouth, pointing straight out of the face.
+		local beak = Shapes.onSurface(head, Vector3.new(0, -0.15, -1), -0.35)
+		Shapes.blob(model, "Beak", Vector3.new(0.55, 0.38, 1.1), beak, Color3.fromRGB(95, 88, 110))
+		Shapes.stitches(model, { beak * CFrame.new(-0.25, 0, 0.2), beak * CFrame.new(0, 0, -0.35), beak * CFrame.new(0.25, 0, 0.2) }, thread, 0.05)
+		return eyes
+	end
 	Shapes.blob(model, "Nose", Vector3.new(0.3, 0.2, 0.18), Shapes.onSurface(host, Vector3.new(0, noseY, -1), -0.05), noseColor, Enum.Material.SmoothPlastic)
+
+	if species.Mouth == "Teeth" then
+		-- A zigzag of stitched white teeth across the muzzle.
+		local zig = {}
+		for i = 0, 8 do
+			local x = -0.38 + i * 0.095
+			table.insert(zig, Vector3.new(x, mouthY + (if i % 2 == 0 then 0.06 else -0.06), -1))
+		end
+		Shapes.stitches(model, Shapes.path(host, zig, 0), Color3.fromRGB(245, 242, 232), 0.08)
+		return eyes
+	end
 
 	if options.TooWide then
 		-- Stitched across the whole face, cheek to cheek, even past a muzzle.
