@@ -23,7 +23,8 @@ local function corner(parent: Instance, scale: number)
 	c.Parent = parent
 end
 
-function SpeechBubble.create(head: BasePart): Bubble
+-- `name` adds a little name tag above the bubble (regulars have one; strangers don't).
+function SpeechBubble.create(head: BasePart, name: string?): Bubble
 	local gui = Instance.new("BillboardGui")
 	gui.Name = "SpeechBubble"
 	gui.Size = UDim2.fromScale(6, 2.2) -- in studs, so it shrinks with distance like a real sign
@@ -46,6 +47,21 @@ function SpeechBubble.create(head: BasePart): Bubble
 	stroke.Color = C.Trim
 	stroke.Thickness = 3
 	stroke.Parent = bubble
+
+	if name then
+		local tag = Instance.new("TextLabel")
+		tag.AnchorPoint = Vector2.new(0, 1)
+		tag.Position = UDim2.fromScale(0.06, 0.08)
+		tag.Size = UDim2.fromScale(0.36, 0.26)
+		tag.BackgroundColor3 = C.Neon
+		tag.Font = Enum.Font.FredokaOne
+		tag.TextScaled = true
+		tag.TextColor3 = Color3.new(1, 1, 1)
+		tag.Text = name
+		tag.ZIndex = 2
+		tag.Parent = bubble
+		corner(tag, 0.5)
+	end
 
 	local label = Instance.new("TextLabel")
 	label.AnchorPoint = Vector2.new(0.5, 0.5)
